@@ -232,6 +232,68 @@ function removeSetKeysFromExpr(node, keysToRemove) {
   return node
 }
 
+function collectSetKeysFromExpr(node, allowedKeys) {
+  if (!node || !Array.isArray(allowedKeys) || allowedKeys.length === 0) return []
+  const allowed = new Set(allowedKeys)
+  const found = new Set()
+
+  const walk = (n) => {
+    if (!n) return
+    if (n.type === 'set') {
+      if (allowed.has(n.key)) found.add(n.key)
+      return
+    }
+    if (n.type === 'group') {
+      walk(n.child)
+      return
+    }
+    if (n.type === 'or' || n.type === 'and') {
+      n.children.forEach(walk)
+    }
+  }
+
+  walk(node)
+  return allowedKeys.filter((k) => found.has(k))
+}
+
+function buildStatusVisibilityExpr(existingExpr, config) {
+  const {
+    statusKeys,
+    selectedStatusKeys,
+    visibilityKeys,
+    selectedVisibilityKeys,
+    setSchemaProps,
+  } = config
+
+  const stripKeys = [...statusKeys, ...visibilityKeys]
+  const baseExpr = removeSetKeysFromExpr(existingExpr, stripKeys)
+
+  const makeOrBlock = (keys) => {
+    if (!keys.length) return null
+    const mergedProps = Object.fromEntries(
+      keys.map((k) => [k, setSchemaProps?.[k] ?? { isObject: false }])
+    )
+    return buildBlockFromKeys(keys, mergedProps, 'or')
+  }
+
+  const statusBlock = makeOrBlock(selectedStatusKeys)
+  const visibilityBlock = makeOrBlock(selectedVisibilityKeys)
+  const blocks = [baseExpr, statusBlock, visibilityBlock].filter(Boolean)
+
+  if (blocks.length === 0) return null
+
+  let next = blocks[0]
+  for (let i = 1; i < blocks.length; i += 1) {
+    next = appendBlock(next, blocks[i], 'and')
+  }
+  return next
+}
+
+function formatSetChoiceLabel(key) {
+  const singular = key.replace(/s$/, '')
+  return singular.charAt(0).toUpperCase() + singular.slice(1)
+}
+
 function IdentityTab({ token }) {
   const claims = parseJwt(token)
 
@@ -553,11 +615,15 @@ export default function ResourcePage() {
   const [qDropdownOpen, setQDropdownOpen] = useState(false)
   const [fieldsetDropdownOpen, setFieldsetDropdownOpen] = useState(false)
   const [setsDropdownOpen, setSetsDropdownOpen] = useState(false)
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
+  const [visibilityDropdownOpen, setVisibilityDropdownOpen] = useState(false)
   const [fieldDropdownOpen, setFieldDropdownOpen] = useState(false)
   const [hiddenFieldDropdownOpen, setHiddenFieldDropdownOpen] = useState(false)
   const qDropdownRef = useRef(null)
   const fieldsetDropdownRef = useRef(null)
   const setsDropdownRef = useRef(null)
+  const statusDropdownRef = useRef(null)
+  const visibilityDropdownRef = useRef(null)
   const fieldDropdownRef = useRef(null)
   const hiddenFieldDropdownRef = useRef(null)
   const isResizing = useRef(false)
@@ -800,6 +866,28 @@ export default function ResourcePage() {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [setsDropdownOpen])
+
+  useEffect(() => {
+    if (!statusDropdownOpen) return undefined
+    const handler = (e) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(e.target)) {
+        setStatusDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [statusDropdownOpen])
+
+  useEffect(() => {
+    if (!visibilityDropdownOpen) return undefined
+    const handler = (e) => {
+      if (visibilityDropdownRef.current && !visibilityDropdownRef.current.contains(e.target)) {
+        setVisibilityDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [visibilityDropdownOpen])
 
   useEffect(() => {
     if (!fieldDropdownOpen) return undefined
@@ -2043,44 +2131,105 @@ export default function ResourcePage() {
 
             {/* ── Status dropdown ── */}
             {navItem.hasSet && navItem.hasValidityDates && navItem.setSchemaProps && ['actives', 'pendings', 'expireds'].some((k) => k in navItem.setSchemaProps) && (
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" ref={statusDropdownRef}>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Status</p>
                 {(() => {
                   const statusKeys = ['actives', 'pendings', 'expireds'].filter((k) => k in navItem.setSchemaProps)
-                  const activeStatusKeys = (() => {
-                    if (!filterBuilderExpr) return []
-                    const collect = (node) => {
-                      if (!node) return []
-                      if (node.type === 'set' && statusKeys.includes(node.key)) return [node.key]
-                      if (node.type === 'group') return collect(node.child)
-                      if (node.type === 'or' || node.type === 'and') return node.children.flatMap(collect)
-                      return []
-                    }
-                    return collect(filterBuilderExpr)
-                  })()
-                  const selectedStatus = activeStatusKeys.length === 1 ? activeStatusKeys[0] : ''
+                  const visKeys = ['publics', 'protecteds', 'privates'].filter((k) => k in navItem.setSchemaProps)
+                  const activeStatusKeys = collectSetKeysFromExpr(filterBuilderExpr, statusKeys)
+                  const statusLabel = activeStatusKeys.length === 0
+                    ? '— none —'
+                    : `${activeStatusKeys.length} selected`
 
                   return (
                     <div className="relative">
-                      <select
-                        value={selectedStatus}
-                        onChange={(e) => {
-                          const nextValue = e.target.value
-                          setPage(0)
-                          setFilterBuilderExpr((prev) => {
-                            const withoutStatus = removeSetKeysFromExpr(prev, statusKeys)
-                            if (!nextValue) return withoutStatus
-                            return appendBlock(withoutStatus, makeSet(nextValue), 'or')
-                          })
-                        }}
-                        className={`${FILTER_CONTROL_CLASS} min-w-[130px] appearance-none pr-7 ${selectedStatus ? 'text-slate-200 hover:text-white' : 'text-slate-500 hover:text-white'}`}
+                      <button
+                        type="button"
+                        onClick={() => setStatusDropdownOpen((v) => !v)}
+                        className={`${FILTER_CONTROL_CLASS} min-w-[130px] flex items-center justify-between gap-2`}
                       >
-                        <option value="" className="text-slate-500">— none —</option>
-                        {statusKeys.map((key) => (
-                          <option key={key} value={key} className="text-slate-200">{key.replace(/s$/, '').charAt(0).toUpperCase() + key.replace(/s$/, '').slice(1)}</option>
-                        ))}
-                      </select>
-                      <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        <span className={activeStatusKeys.length > 0 ? 'text-blue-300' : 'text-slate-500'}>{statusLabel}</span>
+                        <svg className={`w-3 h-3 text-slate-500 transition-transform shrink-0 ${statusDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                      </button>
+                      {statusDropdownOpen && (
+                        <div className="absolute z-30 mt-1 min-w-[190px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-700/60">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPage(0)
+                                setFilterBuilderExpr((prev) => {
+                                  const selectedVisibilityKeys = collectSetKeysFromExpr(prev, visKeys)
+                                  return buildStatusVisibilityExpr(prev, {
+                                    statusKeys,
+                                    selectedStatusKeys: statusKeys,
+                                    visibilityKeys: visKeys,
+                                    selectedVisibilityKeys,
+                                    setSchemaProps: navItem.setSchemaProps,
+                                  })
+                                })
+                              }}
+                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                            >
+                              All
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPage(0)
+                                setFilterBuilderExpr((prev) => {
+                                  const selectedVisibilityKeys = collectSetKeysFromExpr(prev, visKeys)
+                                  return buildStatusVisibilityExpr(prev, {
+                                    statusKeys,
+                                    selectedStatusKeys: [],
+                                    visibilityKeys: visKeys,
+                                    selectedVisibilityKeys,
+                                    setSchemaProps: navItem.setSchemaProps,
+                                  })
+                                })
+                              }}
+                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                            >
+                              None
+                            </button>
+                          </div>
+                          <div className="max-h-44 overflow-y-auto py-1">
+                            {statusKeys.map((key) => {
+                              const checked = activeStatusKeys.includes(key)
+                              return (
+                                <label key={key} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-slate-800 group">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      setPage(0)
+                                      setFilterBuilderExpr((prev) => {
+                                        const prevStatusKeys = collectSetKeysFromExpr(prev, statusKeys)
+                                        const selectedVisibilityKeys = collectSetKeysFromExpr(prev, visKeys)
+                                        const nextStatusKeys = prevStatusKeys.includes(key)
+                                          ? prevStatusKeys.filter((k) => k !== key)
+                                          : [...prevStatusKeys, key]
+
+                                        return buildStatusVisibilityExpr(prev, {
+                                          statusKeys,
+                                          selectedStatusKeys: nextStatusKeys,
+                                          visibilityKeys: visKeys,
+                                          selectedVisibilityKeys,
+                                          setSchemaProps: navItem.setSchemaProps,
+                                        })
+                                      })
+                                    }}
+                                    className="w-3.5 h-3.5 rounded accent-blue-500 cursor-pointer shrink-0"
+                                  />
+                                  <span className="text-xs font-mono text-slate-300 group-hover:text-white truncate">{formatSetChoiceLabel(key)}</span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })()}
@@ -2089,44 +2238,105 @@ export default function ResourcePage() {
 
             {/* ── Visibility dropdown ── */}
             {navItem.hasSet && navItem.setSchemaProps && ['publics', 'protecteds', 'privates'].some((k) => k in navItem.setSchemaProps) && (
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" ref={visibilityDropdownRef}>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Visibility</p>
                 {(() => {
+                  const statusKeys = ['actives', 'pendings', 'expireds'].filter((k) => k in navItem.setSchemaProps)
                   const visKeys = ['publics', 'protecteds', 'privates'].filter((k) => k in navItem.setSchemaProps)
-                  const activeVisKeys = (() => {
-                    if (!filterBuilderExpr) return []
-                    const collect = (node) => {
-                      if (!node) return []
-                      if (node.type === 'set' && visKeys.includes(node.key)) return [node.key]
-                      if (node.type === 'group') return collect(node.child)
-                      if (node.type === 'or' || node.type === 'and') return node.children.flatMap(collect)
-                      return []
-                    }
-                    return collect(filterBuilderExpr)
-                  })()
-                  const selectedVisibility = activeVisKeys.length === 1 ? activeVisKeys[0] : ''
+                  const activeVisKeys = collectSetKeysFromExpr(filterBuilderExpr, visKeys)
+                  const visibilityLabel = activeVisKeys.length === 0
+                    ? '— none —'
+                    : `${activeVisKeys.length} selected`
 
                   return (
                     <div className="relative">
-                      <select
-                        value={selectedVisibility}
-                        onChange={(e) => {
-                          const nextValue = e.target.value
-                          setPage(0)
-                          setFilterBuilderExpr((prev) => {
-                            const withoutVisibility = removeSetKeysFromExpr(prev, visKeys)
-                            if (!nextValue) return withoutVisibility
-                            return appendBlock(withoutVisibility, makeSet(nextValue), 'or')
-                          })
-                        }}
-                        className={`${FILTER_CONTROL_CLASS} min-w-[140px] appearance-none pr-7 ${selectedVisibility ? 'text-slate-200 hover:text-white' : 'text-slate-500 hover:text-white'}`}
+                      <button
+                        type="button"
+                        onClick={() => setVisibilityDropdownOpen((v) => !v)}
+                        className={`${FILTER_CONTROL_CLASS} min-w-[140px] flex items-center justify-between gap-2`}
                       >
-                        <option value="" className="text-slate-500">— none —</option>
-                        {visKeys.map((key) => (
-                          <option key={key} value={key} className="text-slate-200">{key.replace(/s$/, '').charAt(0).toUpperCase() + key.replace(/s$/, '').slice(1)}</option>
-                        ))}
-                      </select>
-                      <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        <span className={activeVisKeys.length > 0 ? 'text-blue-300' : 'text-slate-500'}>{visibilityLabel}</span>
+                        <svg className={`w-3 h-3 text-slate-500 transition-transform shrink-0 ${visibilityDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                      </button>
+                      {visibilityDropdownOpen && (
+                        <div className="absolute z-30 mt-1 min-w-[190px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-700/60">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPage(0)
+                                setFilterBuilderExpr((prev) => {
+                                  const selectedStatusKeys = collectSetKeysFromExpr(prev, statusKeys)
+                                  return buildStatusVisibilityExpr(prev, {
+                                    statusKeys,
+                                    selectedStatusKeys,
+                                    visibilityKeys: visKeys,
+                                    selectedVisibilityKeys: visKeys,
+                                    setSchemaProps: navItem.setSchemaProps,
+                                  })
+                                })
+                              }}
+                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                            >
+                              All
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPage(0)
+                                setFilterBuilderExpr((prev) => {
+                                  const selectedStatusKeys = collectSetKeysFromExpr(prev, statusKeys)
+                                  return buildStatusVisibilityExpr(prev, {
+                                    statusKeys,
+                                    selectedStatusKeys,
+                                    visibilityKeys: visKeys,
+                                    selectedVisibilityKeys: [],
+                                    setSchemaProps: navItem.setSchemaProps,
+                                  })
+                                })
+                              }}
+                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                            >
+                              None
+                            </button>
+                          </div>
+                          <div className="max-h-44 overflow-y-auto py-1">
+                            {visKeys.map((key) => {
+                              const checked = activeVisKeys.includes(key)
+                              return (
+                                <label key={key} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-slate-800 group">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      setPage(0)
+                                      setFilterBuilderExpr((prev) => {
+                                        const prevVisKeys = collectSetKeysFromExpr(prev, visKeys)
+                                        const selectedStatusKeys = collectSetKeysFromExpr(prev, statusKeys)
+                                        const nextVisKeys = prevVisKeys.includes(key)
+                                          ? prevVisKeys.filter((k) => k !== key)
+                                          : [...prevVisKeys, key]
+
+                                        return buildStatusVisibilityExpr(prev, {
+                                          statusKeys,
+                                          selectedStatusKeys,
+                                          visibilityKeys: visKeys,
+                                          selectedVisibilityKeys: nextVisKeys,
+                                          setSchemaProps: navItem.setSchemaProps,
+                                        })
+                                      })
+                                    }}
+                                    className="w-3.5 h-3.5 rounded accent-blue-500 cursor-pointer shrink-0"
+                                  />
+                                  <span className="text-xs font-mono text-slate-300 group-hover:text-white truncate">{formatSetChoiceLabel(key)}</span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })()}
