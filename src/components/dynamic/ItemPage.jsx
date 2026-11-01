@@ -31,7 +31,7 @@ function EditorActions({ onCommit, onCancel }) {
       <button
         type="button"
         onClick={onCancel}
-        className="px-2.5 py-1 text-xs rounded-md border border-slate-600 text-slate-400 hover:text-slate-300 hover:border-slate-500 transition-colors"
+        className="px-2.5 py-1 text-xs rounded-md border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500 transition-colors"
       >
         Cancel
       </button>
@@ -67,7 +67,7 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
               className={`px-2.5 py-1 rounded-md text-xs border transition-colors ${
                 localVal === v
                   ? 'bg-blue-600 border-blue-500 text-white'
-                  : 'border-slate-600 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                  : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
               }`}
             >
               {v === null ? 'null' : String(v)}
@@ -88,16 +88,16 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
     const opts = [...enumVals, ...(nullable ? [null] : [])]
     return (
       <div>
-        <div className="inline-flex mt-1 rounded-lg border border-slate-700 overflow-hidden">
+        <div className="inline-flex mt-1 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
           {opts.map((v) => (
             <button
               key={String(v)}
               type="button"
               onClick={() => setLocalVal(v)}
-              className={`px-3 py-1.5 text-xs border-r border-slate-700 last:border-r-0 transition-colors ${
+              className={`px-3 py-1.5 text-xs border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                 localVal === v
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
               }`}
             >
               {v === null ? 'null' : String(v)}
@@ -116,7 +116,7 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
         <select
           value={localVal ?? ''}
           onChange={(e) => setLocalVal(e.target.value === '' ? null : e.target.value)}
-          className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           {nullable && <option value="">null</option>}
           {enumVals.map((v) => (
@@ -138,7 +138,7 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
           type="datetime-local"
           value={toInput(localVal)}
           onChange={(e) => setLocalVal(fromInput(e.target.value))}
-          className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <EditorActions onCommit={() => onCommit(localVal)} onCancel={onCancel} />
       </div>
@@ -156,7 +156,7 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
           onChange={(e) =>
             setLocalVal(e.target.value === '' ? null : Number(e.target.value))
           }
-          className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <EditorActions onCommit={() => onCommit(localVal)} onCancel={onCancel} />
       </div>
@@ -176,18 +176,18 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
       <div className="mt-1">
         <div className="flex flex-wrap gap-1.5 mb-2 min-h-[24px]">
           {arr.length === 0 ? (
-            <span className="text-xs text-slate-500 italic">empty — add items below</span>
+            <span className="text-xs text-gray-400 dark:text-slate-500 italic">empty — add items below</span>
           ) : (
             arr.map((it, i) => (
               <span
                 key={i}
-                className="flex items-center gap-1 px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-200"
+                className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-xs text-gray-800 dark:text-slate-200"
               >
                 {String(it)}
                 <button
                   type="button"
                   onClick={() => setLocalVal(arr.filter((_, j) => j !== i))}
-                  className="text-slate-400 hover:text-red-400 transition-colors leading-none ml-0.5"
+                  className="text-gray-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors leading-none ml-0.5"
                 >
                   ×
                 </button>
@@ -203,12 +203,12 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
               if (e.key === 'Enter') { e.preventDefault(); addItem() }
             }}
             placeholder="Type item and press Enter"
-            className="flex-1 bg-slate-800 border border-slate-600 rounded-md px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             type="button"
             onClick={addItem}
-            className="px-2 py-1 text-xs rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+            className="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 transition-colors"
           >
             Add
           </button>
@@ -226,7 +226,7 @@ function FieldEditor({ currentValue, schema, onCommit, onCancel }) {
         type="text"
         value={localVal ?? ''}
         onChange={(e) => setLocalVal(e.target.value)}
-        className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
       />
       <EditorActions onCommit={() => onCommit(localVal)} onCancel={onCancel} />
     </div>
@@ -306,7 +306,7 @@ function AddFieldRow({ onAdd }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 mt-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="flex items-center gap-1 mt-1 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 transition-colors"
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -317,9 +317,9 @@ function AddFieldRow({ onAdd }) {
   }
 
   return (
-    <div className="rounded-lg bg-slate-800/40 border border-dashed border-slate-600 p-3 space-y-2.5">
+    <div className="rounded-lg bg-gray-50 dark:bg-slate-800/40 border border-dashed border-gray-200 dark:border-slate-600 p-3 space-y-2.5">
       <div>
-        <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Field name</p>
+        <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Field name</p>
         <input
           autoFocus
           type="text"
@@ -327,22 +327,22 @@ function AddFieldRow({ onAdd }) {
           onChange={(e) => setFieldName(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm() }}
           placeholder="e.g. rating"
-          className="w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
       <div>
-        <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Type</p>
-        <div className="inline-flex rounded-lg border border-slate-700 overflow-hidden">
+        <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Type</p>
+        <div className="inline-flex rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
           {ADD_FIELD_TYPES.map(({ key, label }) => (
             <button
               key={key}
               type="button"
               onClick={() => setFieldType(key)}
-              className={`px-2.5 py-1 text-xs border-r border-slate-700 last:border-r-0 transition-colors ${
+              className={`px-2.5 py-1 text-xs border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                 fieldType === key
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
               }`}
             >
               {label}
@@ -353,30 +353,30 @@ function AddFieldRow({ onAdd }) {
 
       {fieldType === 'string' && (
         <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Value</p>
+          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Value</p>
           <input
             type="text"
             value={stringVal}
             onChange={(e) => setStringVal(e.target.value)}
-            className="w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       )}
       {fieldType === 'number' && (
         <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Value</p>
+          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Value</p>
           <input
             type="number"
             step="any"
             value={numberVal}
             onChange={(e) => setNumberVal(e.target.value)}
-            className="w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       )}
       {fieldType === 'boolean' && (
         <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Value</p>
+          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Value</p>
           <div className="flex gap-1.5">
             {[true, false].map((v) => (
               <button
@@ -386,7 +386,7 @@ function AddFieldRow({ onAdd }) {
                 className={`px-2.5 py-1 rounded-md text-xs border transition-colors ${
                   boolVal === v
                     ? 'bg-blue-600 border-blue-500 text-white'
-                    : 'border-slate-600 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                    : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
                 }`}
               >
                 {String(v)}
@@ -397,18 +397,18 @@ function AddFieldRow({ onAdd }) {
       )}
       {fieldType === 'array' && (
         <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Items</p>
+          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Items</p>
           <div className="flex flex-wrap gap-1.5 mb-2 min-h-[24px]">
             {arrayItems.length === 0 ? (
-              <span className="text-xs text-slate-500 italic">No items yet</span>
+              <span className="text-xs text-gray-400 dark:text-slate-500 italic">No items yet</span>
             ) : (
               arrayItems.map((it, i) => (
-                <span key={i} className="flex items-center gap-1 px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-200">
+                <span key={i} className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-xs text-gray-800 dark:text-slate-200">
                   {String(it)}
                   <button
                     type="button"
                     onClick={() => setArrayItems((prev) => prev.filter((_, j) => j !== i))}
-                    className="text-slate-400 hover:text-red-400 transition-colors leading-none"
+                    className="text-gray-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors leading-none"
                   >
                     &times;
                   </button>
@@ -422,25 +422,25 @@ function AddFieldRow({ onAdd }) {
               onChange={(e) => setArrayInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addArrayItem() } }}
               placeholder="Type item and press Enter"
-              className="flex-1 bg-slate-800 border border-slate-600 rounded-md px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <button type="button" onClick={addArrayItem} className="px-2 py-1 text-xs rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">Add</button>
+            <button type="button" onClick={addArrayItem} className="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 transition-colors">Add</button>
           </div>
         </div>
       )}
       {fieldType === 'object' && (
         <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Value (JSON)</p>
+          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Value (JSON)</p>
           <textarea
             value={objectVal}
             onChange={(e) => setObjectVal(e.target.value)}
             rows={3}
-            className="w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       )}
       {fieldType === 'null' && (
-        <p className="text-xs text-slate-500 italic">Value will be set to null</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500 italic">Value will be set to null</p>
       )}
 
       <div className="flex gap-2">
@@ -455,7 +455,7 @@ function AddFieldRow({ onAdd }) {
         <button
           type="button"
           onClick={() => { reset(); setOpen(false) }}
-          className="px-2.5 py-1 text-xs rounded-md border border-slate-600 text-slate-400 hover:text-slate-300 hover:border-slate-500 transition-colors"
+          className="px-2.5 py-1 text-xs rounded-md border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500 transition-colors"
         >
           Cancel
         </button>
@@ -467,8 +467,8 @@ function AddFieldRow({ onAdd }) {
 function EditableFieldRow({ label, displayValue, schema, isEditing, isPending, canEdit, onEdit, onCommit, onCancel, onRevert }) {
   if (isEditing) {
     return (
-      <div className="rounded-lg bg-slate-800/40 border border-slate-700/60 p-2.5">
-        <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
+      <div className="rounded-lg bg-gray-50 dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/60 p-2.5">
+        <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
         <FieldEditor
           currentValue={displayValue}
           schema={schema}
@@ -482,13 +482,13 @@ function EditableFieldRow({ label, displayValue, schema, isEditing, isPending, c
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-0.5">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wide">{label}</p>
+        <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide">{label}</p>
         <div className="flex items-center gap-0.5">
           {isPending && onRevert && (
             <button
               type="button"
               onClick={onRevert}
-              className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-5 h-5 rounded text-amber-500 hover:text-amber-300 hover:bg-slate-700 transition-all"
+              className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-5 h-5 rounded text-amber-500 hover:text-amber-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
               aria-label={`Revert ${label}`}
               title="Revert to original"
             >
@@ -499,7 +499,7 @@ function EditableFieldRow({ label, displayValue, schema, isEditing, isPending, c
             <button
               type="button"
               onClick={onEdit}
-              className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-5 h-5 rounded text-slate-500 hover:text-slate-300 hover:bg-slate-700 transition-all"
+              className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-5 h-5 rounded text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
               aria-label={`Edit ${label}`}
             >
               <PencilIcon />
@@ -512,9 +512,9 @@ function EditableFieldRow({ label, displayValue, schema, isEditing, isPending, c
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 mt-0.5" title="Unsaved change" />
         )}
         <p className={`text-sm break-all ${
-          isPending ? 'text-amber-200' :
-          (displayValue === null || displayValue === undefined) ? 'text-slate-500 italic' :
-          'text-slate-200'
+          isPending ? 'text-amber-700 dark:text-amber-200' :
+          (displayValue === null || displayValue === undefined) ? 'text-gray-400 dark:text-slate-500 italic' :
+          'text-gray-800 dark:text-slate-200'
         }`}>
           {formatValue(displayValue)}
         </p>
@@ -697,24 +697,24 @@ export default function ItemPage() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-black/40 dark:bg-slate-950/70 backdrop-blur-sm"
         onClick={close}
         aria-hidden="true"
       />
 
       {/* Modal panel */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-slate-900 border border-slate-700 shadow-2xl">
+        <div className="pointer-events-auto w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-2xl">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-700 flex-shrink-0">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0">
             <div>
-              <h2 className="text-sm font-semibold text-slate-100">{navItem.label}</h2>
-              <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate max-w-[380px]">{decodedId}</p>
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-slate-100">{navItem.label}</h2>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500 font-mono mt-0.5 truncate max-w-[380px]">{decodedId}</p>
             </div>
             <button
               onClick={close}
-              className="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Close"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -724,15 +724,15 @@ export default function ItemPage() {
           </div>
 
           {/* Tab bar */}
-          <div className="flex border-b border-slate-700 flex-shrink-0 px-5">
+          <div className="flex border-b border-gray-200 dark:border-slate-700 flex-shrink-0 px-5">
             {['fields', ...(hasEdit ? ['edit'] : [])].map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
                 className={`py-2.5 px-1 mr-5 text-xs font-medium border-b-2 transition-colors ${
                   tab === t
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-300'
+                    ? 'border-blue-500 text-blue-500 dark:text-blue-400'
+                    : 'border-transparent text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
                 }`}
               >
                 {t === 'fields' ? (
@@ -752,10 +752,10 @@ export default function ItemPage() {
             {tab === 'fields' && (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wide">Fields</span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide">Fields</span>
                   <div className="flex items-center gap-1">
                     {(canActivate || canDeactivate) && (
-                      <div className="inline-flex rounded-md border border-slate-700 overflow-hidden">
+                      <div className="inline-flex rounded-md border border-gray-200 dark:border-slate-700 overflow-hidden">
                         {canActivate && (
                           <button
                             onClick={() => setPendingActivate(true)}
@@ -769,7 +769,7 @@ export default function ItemPage() {
                             {activating ? (isReactivate ? 'Reactivating…' : 'Activating…') : (isReactivate ? 'Reactivate' : 'Activate')}
                           </button>
                         )}
-                        {canActivate && canDeactivate && <span className="w-px bg-slate-700" />}
+                        {canActivate && canDeactivate && <span className="w-px bg-gray-200 dark:bg-slate-700" />}
                         {canDeactivate && (
                           <button
                             onClick={() => setPendingDeactivate(true)}
@@ -787,7 +787,7 @@ export default function ItemPage() {
                     )}
                     <button
                       onClick={refresh}
-                      className="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+                      className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                       title="Refresh"
                       aria-label="Refresh"
                     >
@@ -799,7 +799,7 @@ export default function ItemPage() {
                 </div>
 
                 {loading ? (
-                  <p className="text-slate-400 text-sm">Loading…</p>
+                  <p className="text-gray-500 dark:text-slate-400 text-sm">Loading…</p>
                 ) : error ? (
                   <p className="text-red-400 text-sm">{error}</p>
                 ) : (
@@ -846,15 +846,15 @@ export default function ItemPage() {
                       <AddFieldRow onAdd={(name, val) => commitEdit(name, val)} />
                     )}
                     {/* Managed fields */}
-                    <div className="border-t border-slate-700 pt-3">
+                    <div className="border-t border-gray-200 dark:border-slate-700 pt-3">
                       <button
                         onClick={() => setManagedFieldsOpen((o) => !o)}
                         className="flex items-center gap-1.5 mb-2 group cursor-pointer"
                         aria-label={managedFieldsOpen ? 'Collapse managed fields' : 'Expand managed fields'}
                       >
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wide group-hover:text-slate-400 transition-colors">Managed fields</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide group-hover:text-gray-600 dark:group-hover:text-slate-400 transition-colors">Managed fields</p>
                         <svg
-                          className={`w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-colors transition-transform ${managedFieldsOpen ? 'rotate-180' : ''}`}
+                          className={`w-3 h-3 text-gray-300 dark:text-slate-600 group-hover:text-gray-500 dark:group-hover:text-slate-400 transition-colors transition-transform ${managedFieldsOpen ? 'rotate-180' : ''}`}
                           fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -885,7 +885,7 @@ export default function ItemPage() {
 
                     {/* Inline PATCH save bar */}
                     {hasPendingEdits && (
-                      <div className="border-t border-slate-700 pt-4 space-y-3">
+                      <div className="border-t border-gray-200 dark:border-slate-700 pt-4 space-y-3">
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
@@ -901,7 +901,7 @@ export default function ItemPage() {
                             type="button"
                             onClick={() => { setPendingEdits({}); setEditingField(null); setPatchError(null) }}
                             disabled={patchSaving}
-                            className="px-3 py-1.5 text-xs rounded-lg border border-slate-600 text-slate-400 hover:text-slate-300 hover:border-slate-500 disabled:opacity-50 transition-colors"
+                            className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500 disabled:opacity-50 transition-colors"
                           >
                             Discard
                           </button>
@@ -927,12 +927,12 @@ export default function ItemPage() {
 
             {tab === 'edit' && (
               <>
-                <p className="text-xs text-slate-500">Request body (JSON)</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">Request body (JSON)</p>
                 <textarea
                   value={bodyText}
                   onChange={(e) => setBodyText(e.target.value)}
                   rows={10}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-3 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder={'{\n  "_name": "Updated name"\n}'}
                 />
                 {actionError && <p className="text-red-400 text-xs">{actionError}</p>}
@@ -943,7 +943,7 @@ export default function ItemPage() {
 
           {/* Footer */}
           {tab === 'edit' && (
-            <div className="flex items-center gap-2 px-5 py-3.5 border-t border-slate-700 flex-shrink-0">
+            <div className="flex items-center gap-2 px-5 py-3.5 border-t border-gray-200 dark:border-slate-700 flex-shrink-0">
               {navItem.itemMethods.includes('put') && (
                 <button
                   onClick={() => runAction('put')}

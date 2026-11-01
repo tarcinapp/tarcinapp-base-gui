@@ -111,7 +111,7 @@ function buildFilterOrderParams(qs, sortOrder) {
   }
 }
 
-const FILTER_CONTROL_CLASS = 'h-[30px] rounded-lg border border-slate-700 bg-slate-800 px-2.5 text-xs text-slate-300 transition-colors hover:border-slate-500 hover:text-white focus:border-slate-500 focus:outline-none focus:ring-0'
+const FILTER_CONTROL_CLASS = 'h-[30px] rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 text-xs text-gray-700 dark:text-slate-300 transition-colors hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-900 dark:hover:text-white focus:border-gray-400 dark:focus:border-slate-500 focus:outline-none focus:ring-0'
 
 function makeEmptyWhereClause(field = '') {
   return {
@@ -189,22 +189,22 @@ function parseJwt(token) {
 }
 
 function formatClaimValue(value) {
-  if (value === null || value === undefined) return <span className="text-slate-500 italic">null</span>
-  if (typeof value === 'boolean') return <span className="text-amber-400 font-mono">{String(value)}</span>
-  if (typeof value === 'number') return <span className="text-sky-400 font-mono">{value}</span>
+  if (value === null || value === undefined) return <span className="text-gray-400 dark:text-slate-500 italic">null</span>
+  if (typeof value === 'boolean') return <span className="text-amber-600 dark:text-amber-400 font-mono">{String(value)}</span>
+  if (typeof value === 'number') return <span className="text-sky-600 dark:text-sky-400 font-mono">{value}</span>
   if (Array.isArray(value)) {
     return (
       <div className="flex flex-wrap gap-1 mt-0.5">
         {value.map((v, i) => (
-          <span key={i} className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">{String(v)}</span>
+          <span key={i} className="px-1.5 py-0.5 text-[10px] rounded bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-mono">{String(v)}</span>
         ))}
       </div>
     )
   }
   if (typeof value === 'object') {
-    return <span className="text-slate-400 font-mono text-[10px] break-all">{JSON.stringify(value)}</span>
+    return <span className="text-gray-500 dark:text-slate-400 font-mono text-[10px] break-all">{JSON.stringify(value)}</span>
   }
-  return <span className="text-slate-300 font-mono break-all">{String(value)}</span>
+  return <span className="text-gray-700 dark:text-slate-300 font-mono break-all">{String(value)}</span>
 }
 
 function removeSetKeysFromExpr(node, keysToRemove) {
@@ -299,7 +299,7 @@ function IdentityTab({ token }) {
 
   if (!token) {
     return (
-      <div className="flex items-center justify-center h-32 text-slate-600 text-xs">
+      <div className="flex items-center justify-center h-32 text-gray-400 dark:text-slate-600 text-xs">
         No token configured.
       </div>
     )
@@ -307,7 +307,7 @@ function IdentityTab({ token }) {
 
   if (!claims) {
     return (
-      <div className="flex items-center justify-center h-32 text-slate-600 text-xs">
+      <div className="flex items-center justify-center h-32 text-gray-400 dark:text-slate-600 text-xs">
         Token is not a valid JWT.
       </div>
     )
@@ -343,10 +343,10 @@ function IdentityTab({ token }) {
       {/* Roles */}
       {rolesArray !== null && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Roles</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Roles</p>
           <div className="flex flex-wrap gap-1.5">
             {rolesArray.length === 0
-              ? <span className="text-xs text-slate-600 italic">No roles</span>
+              ? <span className="text-xs text-gray-400 dark:text-slate-600 italic">No roles</span>
               : rolesArray.map((r) => (
                   <span key={r} className="px-2 py-0.5 text-xs rounded-md bg-violet-600/20 text-violet-300 border border-violet-700 font-mono">{r}</span>
                 ))
@@ -358,13 +358,13 @@ function IdentityTab({ token }) {
       {/* Subject / Issuer / Audience / JTI */}
       {(claims.sub || claims.iss || claims.aud || claims.jti) && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Identity</p>
-          <div className="rounded-lg border border-slate-800 divide-y divide-slate-800 overflow-hidden">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Identity</p>
+          <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
             {[['sub', claims.sub], ['iss', claims.iss], ['aud', claims.aud], ['jti', claims.jti]]
               .filter(([, v]) => v != null)
               .map(([key, value]) => (
-                <div key={key} className="px-3 py-1.5 bg-slate-950">
-                  <p className="text-[10px] text-slate-500 font-mono">{key}</p>
+                <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
                   <div className="text-xs mt-0.5">{formatClaimValue(value)}</div>
                 </div>
               ))}
@@ -375,14 +375,14 @@ function IdentityTab({ token }) {
       {/* Timestamps */}
       {(iat !== null || exp !== null || claims.nbf != null) && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Timestamps</p>
-          <div className="rounded-lg border border-slate-800 divide-y divide-slate-800 overflow-hidden">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Timestamps</p>
+          <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
             {[['iat', iat], ['exp', exp], ['nbf', claims.nbf]]
               .filter(([, v]) => v != null)
               .map(([key, ts]) => (
-                <div key={key} className="px-3 py-1.5 bg-slate-950">
-                  <p className="text-[10px] text-slate-500 font-mono">{key}</p>
-                  <p className="text-xs text-slate-300 font-mono">{fmtTime(ts)}</p>
+                <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
+                  <p className="text-xs text-gray-700 dark:text-slate-300 font-mono">{fmtTime(ts)}</p>
                 </div>
               ))}
           </div>
@@ -392,11 +392,11 @@ function IdentityTab({ token }) {
       {/* All other claims */}
       {genericClaims.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Claims</p>
-          <div className="rounded-lg border border-slate-800 divide-y divide-slate-800 overflow-hidden">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Claims</p>
+          <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
             {genericClaims.map(([key, value]) => (
-              <div key={key} className="px-3 py-1.5 bg-slate-950">
-                <p className="text-[10px] text-slate-500 font-mono">{key}</p>
+              <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
                 <div className="text-xs mt-0.5">{formatClaimValue(value)}</div>
               </div>
             ))}
@@ -419,16 +419,16 @@ function TagInput({ value, onChange }) {
 
   return (
     <div
-      className="flex flex-wrap gap-1.5 p-2 bg-slate-950 border border-slate-700 rounded-lg min-h-[38px] focus-within:ring-1 focus-within:border-blue-500 focus-within:ring-blue-500 cursor-text"
+      className="flex flex-wrap gap-1.5 p-2 bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg min-h-[38px] focus-within:ring-1 focus-within:border-blue-500 focus-within:ring-blue-500 cursor-text"
       onClick={(e) => { if (e.target === e.currentTarget) e.currentTarget.querySelector('input')?.focus() }}
     >
       {items.map((item, idx) => (
-        <span key={idx} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 bg-slate-700 rounded text-xs text-slate-200 font-mono">
+        <span key={idx} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-xs text-gray-800 dark:text-slate-200 font-mono">
           {item}
           <button
             type="button"
             onClick={() => onChange(items.filter((_, i) => i !== idx))}
-            className="text-slate-500 hover:text-white ml-0.5 leading-none"
+            className="text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white ml-0.5 leading-none"
           >
             <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -445,7 +445,7 @@ function TagInput({ value, onChange }) {
           if (e.key === 'Backspace' && !inputVal && items.length > 0) onChange(items.slice(0, -1))
         }}
         placeholder={items.length === 0 ? 'Type and press Enter…' : ''}
-        className="flex-1 min-w-[120px] bg-transparent text-sm text-slate-200 focus:outline-none placeholder-slate-600"
+        className="flex-1 min-w-[120px] bg-transparent text-sm text-gray-800 dark:text-slate-200 focus:outline-none placeholder-gray-400 dark:placeholder-slate-600"
       />
     </div>
   )
@@ -482,7 +482,7 @@ function buildPayloadFromForm(values, fields) {
 }
 
 function renderCreateField(field, value, onChange) {
-  const cls = 'w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500'
+  const cls = 'w-full bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
   if (field.type === 'boolean') {
     const checked = value === true || value === 'true'
@@ -491,7 +491,7 @@ function renderCreateField(field, value, onChange) {
         type="button"
         onClick={() => onChange(!checked)}
         className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-          checked ? 'bg-blue-700 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'
+          checked ? 'bg-blue-700 border-blue-500 text-white' : 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400'
         }`}
       >
         <span className="font-mono">{checked ? 'true' : 'false'}</span>
@@ -1593,8 +1593,8 @@ export default function ResourcePage() {
 
   if (!navItem) {
     return (
-      <div className="text-slate-400 text-sm p-4">
-        Resource not found: <code className="font-mono bg-slate-800 px-1 rounded">{tagSlug}</code>
+      <div className="text-gray-500 dark:text-slate-400 text-sm p-4">
+        Resource not found: <code className="font-mono bg-gray-100 dark:bg-slate-800 px-1 rounded">{tagSlug}</code>
       </div>
     )
   }
@@ -1608,7 +1608,7 @@ export default function ResourcePage() {
         {/* Left: search */}
         {navItem.hasSearch && (
           <div className="relative flex-1 max-w-xs">
-            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
             </svg>
             <input
@@ -1616,10 +1616,10 @@ export default function ResourcePage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by name…"
-              className="w-full pl-8 pr-7 py-2 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full pl-8 pr-7 py-2 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
             {searchInput && (
-              <button onClick={() => setSearchInput('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300" aria-label="Clear search">
+              <button onClick={() => setSearchInput('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300" aria-label="Clear search">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -1629,15 +1629,15 @@ export default function ResourcePage() {
         )}
 
         {selectedCount > 0 && (
-          <div className="inline-flex items-center rounded-lg border border-slate-700 divide-x divide-slate-700 overflow-hidden bg-slate-800">
-            <span className="px-2.5 py-2 text-[11px] text-slate-300 font-medium">
+          <div className="inline-flex items-center rounded-lg border border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden bg-gray-50 dark:bg-slate-800">
+            <span className="px-2.5 py-2 text-[11px] text-gray-700 dark:text-slate-300 font-medium">
               {selectedCount} selected
             </span>
             <button
               type="button"
               onClick={() => setPendingBulkAction('activate')}
               disabled={!canActivate || bulkProgress.running}
-              className="px-2.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title={canActivate ? 'Activate selected records' : 'Activate is not supported on this resource'}
             >
               Activate
@@ -1646,7 +1646,7 @@ export default function ResourcePage() {
               type="button"
               onClick={() => setPendingBulkAction('deactivate')}
               disabled={!canDeactivate || bulkProgress.running}
-              className="px-2.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title={canDeactivate ? 'Deactivate selected records' : 'Deactivate is not supported on this resource'}
             >
               Deactivate
@@ -1655,7 +1655,7 @@ export default function ResourcePage() {
               type="button"
               onClick={() => setPendingBulkAction('hide')}
               disabled={bulkProgress.running}
-              className="px-2.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title="Hide selected records in this UI"
             >
               Hide
@@ -1664,7 +1664,7 @@ export default function ResourcePage() {
               type="button"
               onClick={() => setPendingBulkAction('delete')}
               disabled={!canDeleteItem || bulkProgress.running}
-              className="px-2.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title={canDeleteItem ? 'Delete selected records' : 'Delete is not supported on this resource'}
             >
               Delete
@@ -1673,7 +1673,7 @@ export default function ResourcePage() {
               type="button"
               onClick={() => setSelectedRowIds(new Set())}
               disabled={bulkProgress.running}
-              className="px-2 py-2 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2 py-2 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title="Clear selection"
               aria-label="Clear selection"
             >
@@ -1685,7 +1685,7 @@ export default function ResourcePage() {
         )}
 
         {/* Right: action buttons */}
-        <div className="ml-auto inline-flex rounded-lg border border-slate-700 divide-x divide-slate-700 overflow-hidden">
+        <div className="ml-auto inline-flex rounded-lg border border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden">
           {/* Filter */}
           {(() => {
             const activeFilterCount = [
@@ -1704,7 +1704,7 @@ export default function ResourcePage() {
                 className={`relative flex items-center justify-center w-9 h-9 transition-colors ${
                   filterPanelOpen || activeFilterCount > 0
                     ? 'bg-blue-700 text-white'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white'
+                    : 'bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
                 title="Filters"
                 aria-label="Filters"
@@ -1723,7 +1723,7 @@ export default function ResourcePage() {
           {canCreate && (
             <button
               onClick={() => { if (!createOpen) { setCreateFormValues({}); setCreatePayload('{}'); setCreateTab('form'); setCreateError(null) } setCreateOpen((v) => !v) }}
-              className="flex items-center justify-center w-9 h-9 bg-slate-800 hover:bg-blue-700 text-slate-300 hover:text-white transition-colors"
+              className="flex items-center justify-center w-9 h-9 bg-white dark:bg-slate-800 hover:bg-blue-700 text-gray-600 dark:text-slate-300 hover:text-white transition-colors"
               title="Add New"
               aria-label="Add New"
             >
@@ -1736,7 +1736,7 @@ export default function ResourcePage() {
           {/* Refresh */}
           <button
             onClick={refresh}
-            className="flex items-center justify-center w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+            className="flex items-center justify-center w-9 h-9 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors"
             title="Refresh"
             aria-label="Refresh"
           >
@@ -1749,7 +1749,7 @@ export default function ResourcePage() {
           <button
             onClick={() => setQueryInfoOpen((v) => !v)}
             className={`flex items-center justify-center w-9 h-9 transition-colors ${
-              queryInfoOpen ? 'bg-blue-700 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white'
+              queryInfoOpen ? 'bg-blue-700 text-white' : 'bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
             }`}
             title="Query info"
             aria-label="Query info"
@@ -1762,23 +1762,23 @@ export default function ResourcePage() {
       </div>
 
       {bulkProgress.running && (
-        <div className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">
+        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 px-3 py-2">
           <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="text-slate-300">
+            <span className="text-gray-700 dark:text-slate-300">
               {bulkProgress.action === 'activate' && 'Activating selected records...'}
               {bulkProgress.action === 'deactivate' && 'Deactivating selected records...'}
               {bulkProgress.action === 'hide' && 'Hiding selected records...'}
               {bulkProgress.action === 'delete' && 'Deleting selected records...'}
             </span>
-            <span className="text-slate-500 font-mono">
+            <span className="text-gray-400 dark:text-slate-500 font-mono">
               {bulkProgress.processed}/{bulkProgress.total}
             </span>
           </div>
-          <div className="mt-2 h-1.5 w-full rounded bg-slate-800 overflow-hidden">
-            <div className="h-full bg-slate-500 transition-all duration-200" style={{ width: `${bulkProgressPct}%` }} />
+          <div className="mt-2 h-1.5 w-full rounded bg-gray-200 dark:bg-slate-800 overflow-hidden">
+            <div className="h-full bg-gray-400 dark:bg-slate-500 transition-all duration-200" style={{ width: `${bulkProgressPct}%` }} />
           </div>
           {bulkProgress.currentLabel && (
-            <p className="mt-1 text-[11px] text-slate-500 truncate" title={bulkProgress.currentLabel}>
+            <p className="mt-1 text-[11px] text-gray-400 dark:text-slate-500 truncate" title={bulkProgress.currentLabel}>
               Current: {bulkProgress.currentLabel}
             </p>
           )}
@@ -1787,23 +1787,23 @@ export default function ResourcePage() {
 
       {/* ── Filter panel ── */}
       {filterPanelOpen && (
-        <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 space-y-4">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 space-y-4">
 
           {/* Panel header */}
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-200">Filters</p>
+            <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">Filters</p>
             <div className="flex items-center gap-3">
               {[selectedQ !== null, selectedFieldset !== null, filterBuilderExpr !== null, whereBuilderExpr !== null, fieldSelectorState.mode !== 'all', hiddenFields.size > 0, hiddenRecordIds.size > 0, sortOrder.length > 0].some(Boolean) && (
                 <button
                   onClick={() => { setSelectedQ(null); setSelectedFieldset(null); setFilterBuilderExpr(null); setWhereBuilderExpr(null); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([]); setWhereInternalOp('and'); setFieldSelectorState({ mode: 'all', selected: new Set() }); setHiddenFields(new Set()); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setSortOrder([]); setPage(0) }}
-                  className="text-xs text-slate-400 hover:text-blue-400 transition-colors"
+                  className="text-xs text-gray-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
                 >
                   Clear all
                 </button>
               )}
               <button
                 onClick={() => setFilterPanelOpen(false)}
-                className="flex items-center justify-center w-6 h-6 rounded text-slate-500 hover:text-white transition-colors"
+                className="flex items-center justify-center w-6 h-6 rounded text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                 aria-label="Close filters"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -1819,23 +1819,23 @@ export default function ResourcePage() {
             {/* ── Sets staging dropdown ── */}
             {navItem.hasSet && navItem.setSchemaProps && (
               <div className="space-y-1.5" ref={setsDropdownRef}>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Sets</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Sets</p>
                 <div className="relative">
                   {/* Trigger row: fused control group */}
                   <div className="flex items-center">
-                    <div className="inline-flex h-[30px] overflow-hidden rounded-lg border border-slate-700 bg-slate-800 transition-colors hover:border-slate-500 focus-within:border-slate-500">
+                    <div className="inline-flex h-[30px] overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors hover:border-gray-400 dark:hover:border-slate-500 focus-within:border-gray-400 dark:focus-within:border-slate-500">
 
                       {/* Dropdown trigger */}
                       <button
                         onClick={() => setSetsDropdownOpen((v) => !v)}
-                        className={`flex h-full w-[180px] items-center justify-between bg-slate-800 px-2.5 text-xs transition-colors outline-none hover:text-white focus:outline-none focus:ring-0 ${setsDropdownOpen || stagedSetKeys.length > 0 ? 'text-slate-300' : 'text-slate-300'}`}
+                        className={`flex h-full w-[180px] items-center justify-between bg-white dark:bg-slate-800 px-2.5 text-xs transition-colors outline-none hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-0 ${setsDropdownOpen || stagedSetKeys.length > 0 ? 'text-gray-700 dark:text-slate-300' : 'text-gray-700 dark:text-slate-300'}`}
                       >
                         <span className="flex-1 min-w-0 truncate text-left mr-1.5">
                           {stagedSetKeys.length > 0
                             ? stagedSetKeys.join(', ')
-                            : <span className="text-slate-500">— select sets —</span>}
+                            : <span className="text-gray-400 dark:text-slate-500">— select sets —</span>}
                         </span>
-                        <svg className="w-3 h-3 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        <svg className="w-3 h-3 flex-shrink-0 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                       </button>
 
                       {/* Inject button(s): single "Add" when no existing filter, +and/+or when one exists */}
@@ -1854,7 +1854,7 @@ export default function ResourcePage() {
                             setPage(0)
                           }}
                           title="Add staged sets to the filter"
-                          className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           Add
                         </button>
@@ -1874,7 +1874,7 @@ export default function ResourcePage() {
                               setPage(0)
                             }}
                             title="Append staged sets to the filter builder, joined to the existing expression with AND"
-                            className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             +and
                           </button>
@@ -1892,7 +1892,7 @@ export default function ResourcePage() {
                               setPage(0)
                             }}
                             title="Append staged sets to the filter builder, joined to the existing expression with OR"
-                            className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             +or
                           </button>
@@ -1903,7 +1903,7 @@ export default function ResourcePage() {
                       {stagedSetKeys.length > 0 && (
                         <button
                           onClick={() => { setStagedSetKeys([]); setStagedSetMeta({}) }}
-                          className="flex h-full items-center justify-center px-2 bg-slate-800 text-slate-500 hover:text-white hover:bg-slate-700 transition-colors"
+                          className="flex h-full items-center justify-center px-2 bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                           title="Clear staged selection"
                           aria-label="Clear staged selection"
                         >
@@ -1915,21 +1915,21 @@ export default function ResourcePage() {
 
                   {/* Dropdown panel */}
                   {setsDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1 z-20 min-w-[280px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-3 space-y-3">
+                    <div className="absolute left-0 top-full mt-1 z-20 min-w-[280px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl p-3 space-y-3">
 
                       {/* AND / OR internal toggle */}
                       <div className="flex items-center gap-2">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium shrink-0">Join with</p>
-                        <div className="inline-flex rounded border border-slate-700 overflow-hidden">
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium shrink-0">Join with</p>
+                        <div className="inline-flex rounded border border-gray-200 dark:border-slate-700 overflow-hidden">
                           {['or', 'and'].map((op) => (
                             <button
                               key={op}
                               type="button"
                               onClick={() => setSetsInternalOp(op)}
-                              className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase border-r border-slate-700 last:border-r-0 transition-colors ${
+                              className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                                 setsInternalOp === op
                                   ? 'bg-blue-600 text-white'
-                                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                  : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
                               }`}
                             >
                               {op}
@@ -1938,10 +1938,10 @@ export default function ResourcePage() {
                         </div>
                       </div>
 
-                      <hr className="border-slate-700/60" />
+                      <hr className="border-gray-200 dark:border-slate-700/60" />
 
                       {/* Hint */}
-                      <p className="text-[10px] text-slate-600 italic">Select sets below, then click <span className="font-bold not-italic text-slate-500">+ and</span> or <span className="font-bold not-italic text-slate-500">+ or</span> to append to the filter.</p>
+                      <p className="text-[10px] text-gray-400 dark:text-slate-600 italic">Select sets below, then click <span className="font-bold not-italic text-gray-500 dark:text-slate-500">+ and</span> or <span className="font-bold not-italic text-gray-500 dark:text-slate-500">+ or</span> to append to the filter.</p>
 
                       {/* Set checkboxes with optional userIds / groupIds inputs */}
                       {Object.entries(navItem.setSchemaProps).map(([key, meta]) => {
@@ -1970,13 +1970,13 @@ export default function ResourcePage() {
                                 }}
                                 className="w-3.5 h-3.5 accent-blue-500 cursor-pointer flex-shrink-0"
                               />
-                              <span className={`text-xs font-mono ${isStaged ? 'text-blue-300' : 'text-slate-300 group-hover/setopt:text-white'}`}>{key}</span>
+                              <span className={`text-xs font-mono ${isStaged ? 'text-blue-400' : 'text-gray-700 dark:text-slate-300 group-hover/setopt:text-gray-900 dark:group-hover/setopt:text-white'}`}>{key}</span>
                             </label>
                             {isStaged && meta.isObject && (
                               <div className="ml-5 mt-2 space-y-2">
                                 <div>
-                                  <div className="flex items-center gap-1.5 mb-0.5">
-                                    <p className="text-[10px] text-slate-500">userIds</p>
+                                   <div className="flex items-center gap-1.5 mb-0.5">
+                                     <p className="text-[10px] text-gray-400 dark:text-slate-500">userIds</p>
                                     {jwtSub && (
                                       <button
                                         type="button"
@@ -1998,12 +1998,12 @@ export default function ResourcePage() {
                                     value={stagedSetMeta[key]?.userIds ?? ''}
                                     onChange={(e) => setStagedSetMeta((prev) => ({ ...prev, [key]: { ...prev[key], userIds: e.target.value } }))}
                                     placeholder="user-id-1"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="w-full bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-gray-800 dark:text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
                                   />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1.5 mb-0.5">
-                                    <p className="text-[10px] text-slate-500">groupIds</p>
+                                    <p className="text-[10px] text-gray-400 dark:text-slate-500">groupIds</p>
                                     {jwtGroups && (
                                       <button
                                         type="button"
@@ -2026,7 +2026,7 @@ export default function ResourcePage() {
                                     value={stagedSetMeta[key]?.groupIds ?? ''}
                                     onChange={(e) => setStagedSetMeta((prev) => ({ ...prev, [key]: { ...prev[key], groupIds: e.target.value } }))}
                                     placeholder="group-id-1"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="w-full bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-gray-800 dark:text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
                                   />
                                 </div>
                               </div>
@@ -2044,7 +2044,7 @@ export default function ResourcePage() {
             {/* ── Query dropdown ── */}
             {qEnumValues && (
               <div className="space-y-1.5" ref={qDropdownRef}>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Query</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Query</p>
                 <div className="relative">
                   <button
                     onClick={() => setQDropdownOpen((v) => !v)}
@@ -2058,11 +2058,11 @@ export default function ResourcePage() {
                     <svg className="w-3 h-3 ml-1.5 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   {qDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1 z-20 min-w-[180px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                    <div className="absolute left-0 top-full mt-1 z-20 min-w-[180px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
                       <div className="max-h-48 overflow-y-auto">
                         <button
                           onClick={() => { setSelectedQ(null); setPage(0); setQDropdownOpen(false) }}
-                          className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${selectedQ === null ? 'bg-blue-700/40 text-blue-300' : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'}`}
+                          className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${selectedQ === null ? 'bg-blue-100 dark:bg-blue-700/40 text-blue-600 dark:text-blue-300' : 'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-300'}`}
                         >
                           — none —
                         </button>
@@ -2072,7 +2072,7 @@ export default function ResourcePage() {
                             <button
                               key={val}
                               onClick={() => { setSelectedQ(active ? null : val); setPage(0); setQDropdownOpen(false) }}
-                              className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${active ? 'bg-blue-700/40 text-blue-300' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                              className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${active ? 'bg-blue-100 dark:bg-blue-700/40 text-blue-600 dark:text-blue-300' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'}`}
                             >
                               {val}
                             </button>
@@ -2088,7 +2088,7 @@ export default function ResourcePage() {
             {/* ── Fieldset dropdown ── */}
             {fieldsetEnumValues && (
               <div className="space-y-1.5" ref={fieldsetDropdownRef}>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Fieldset</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Fieldset</p>
                 <div className="relative">
                   <button
                     onClick={() => setFieldsetDropdownOpen((v) => !v)}
@@ -2102,11 +2102,11 @@ export default function ResourcePage() {
                     <svg className="w-3 h-3 ml-1.5 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   {fieldsetDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1 z-20 min-w-[180px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                    <div className="absolute left-0 top-full mt-1 z-20 min-w-[180px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
                       <div className="max-h-48 overflow-y-auto">
                         <button
                           onClick={() => { setSelectedFieldset(null); setPage(0); setFieldsetDropdownOpen(false) }}
-                          className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${selectedFieldset === null ? 'bg-blue-700/40 text-blue-300' : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'}`}
+                          className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${selectedFieldset === null ? 'bg-blue-100 dark:bg-blue-700/40 text-blue-600 dark:text-blue-300' : 'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-300'}`}
                         >
                           — none —
                         </button>
@@ -2116,7 +2116,7 @@ export default function ResourcePage() {
                             <button
                               key={val}
                               onClick={() => { setSelectedFieldset(active ? null : val); setPage(0); setFieldsetDropdownOpen(false) }}
-                              className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${active ? 'bg-blue-700/40 text-blue-300' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                              className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${active ? 'bg-blue-100 dark:bg-blue-700/40 text-blue-600 dark:text-blue-300' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'}`}
                             >
                               {val}
                             </button>
@@ -2132,7 +2132,7 @@ export default function ResourcePage() {
             {/* ── Status dropdown ── */}
             {navItem.hasSet && navItem.hasValidityDates && navItem.setSchemaProps && ['actives', 'pendings', 'expireds'].some((k) => k in navItem.setSchemaProps) && (
               <div className="space-y-1.5" ref={statusDropdownRef}>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Status</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Status</p>
                 {(() => {
                   const statusKeys = ['actives', 'pendings', 'expireds'].filter((k) => k in navItem.setSchemaProps)
                   const visKeys = ['publics', 'protecteds', 'privates'].filter((k) => k in navItem.setSchemaProps)
@@ -2154,8 +2154,8 @@ export default function ResourcePage() {
                         </svg>
                       </button>
                       {statusDropdownOpen && (
-                        <div className="absolute z-30 mt-1 min-w-[190px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
-                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-700/60">
+                        <div className="absolute z-30 mt-1 min-w-[190px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-gray-200 dark:border-slate-700/60">
                             <button
                               type="button"
                               onClick={() => {
@@ -2171,7 +2171,7 @@ export default function ResourcePage() {
                                   })
                                 })
                               }}
-                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                              className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                             >
                               All
                             </button>
@@ -2190,7 +2190,7 @@ export default function ResourcePage() {
                                   })
                                 })
                               }}
-                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                              className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                             >
                               None
                             </button>
@@ -2199,7 +2199,7 @@ export default function ResourcePage() {
                             {statusKeys.map((key) => {
                               const checked = activeStatusKeys.includes(key)
                               return (
-                                <label key={key} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-slate-800 group">
+                                <label key={key} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 group">
                                   <input
                                     type="checkbox"
                                     checked={checked}
@@ -2223,7 +2223,7 @@ export default function ResourcePage() {
                                     }}
                                     className="w-3.5 h-3.5 rounded accent-blue-500 cursor-pointer shrink-0"
                                   />
-                                  <span className="text-xs font-mono text-slate-300 group-hover:text-white truncate">{formatSetChoiceLabel(key)}</span>
+                                  <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white truncate">{formatSetChoiceLabel(key)}</span>
                                 </label>
                               )
                             })}
@@ -2239,7 +2239,7 @@ export default function ResourcePage() {
             {/* ── Visibility dropdown ── */}
             {navItem.hasSet && navItem.setSchemaProps && ['publics', 'protecteds', 'privates'].some((k) => k in navItem.setSchemaProps) && (
               <div className="space-y-1.5" ref={visibilityDropdownRef}>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Visibility</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Visibility</p>
                 {(() => {
                   const statusKeys = ['actives', 'pendings', 'expireds'].filter((k) => k in navItem.setSchemaProps)
                   const visKeys = ['publics', 'protecteds', 'privates'].filter((k) => k in navItem.setSchemaProps)
@@ -2261,8 +2261,8 @@ export default function ResourcePage() {
                         </svg>
                       </button>
                       {visibilityDropdownOpen && (
-                        <div className="absolute z-30 mt-1 min-w-[190px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
-                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-700/60">
+                        <div className="absolute z-30 mt-1 min-w-[190px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-gray-200 dark:border-slate-700/60">
                             <button
                               type="button"
                               onClick={() => {
@@ -2278,7 +2278,7 @@ export default function ResourcePage() {
                                   })
                                 })
                               }}
-                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                              className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                             >
                               All
                             </button>
@@ -2297,7 +2297,7 @@ export default function ResourcePage() {
                                   })
                                 })
                               }}
-                              className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                              className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                             >
                               None
                             </button>
@@ -2306,7 +2306,7 @@ export default function ResourcePage() {
                             {visKeys.map((key) => {
                               const checked = activeVisKeys.includes(key)
                               return (
-                                <label key={key} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-slate-800 group">
+                                <label key={key} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 group">
                                   <input
                                     type="checkbox"
                                     checked={checked}
@@ -2330,7 +2330,7 @@ export default function ResourcePage() {
                                     }}
                                     className="w-3.5 h-3.5 rounded accent-blue-500 cursor-pointer shrink-0"
                                   />
-                                  <span className="text-xs font-mono text-slate-300 group-hover:text-white truncate">{formatSetChoiceLabel(key)}</span>
+                                  <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white truncate">{formatSetChoiceLabel(key)}</span>
                                 </label>
                               )
                             })}
@@ -2362,23 +2362,23 @@ export default function ResourcePage() {
                 : availableFields
               return (
                 <div className="flex items-start gap-6">
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Retrieved Fields</p>
-                    <div className="relative" ref={fieldDropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() => setFieldDropdownOpen((v) => !v)}
-                        className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg min-w-[150px] bg-slate-800 border border-slate-700 text-xs text-slate-300 hover:border-slate-500 hover:text-white transition-colors"
-                      >
-                        <span className={fieldSelectorState.mode === 'all' ? 'text-slate-400' : 'text-blue-300'}>{triggerLabel}</span>
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Retrieved Fields</p>
+                  <div className="relative" ref={fieldDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setFieldDropdownOpen((v) => !v)}
+                      className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg min-w-[150px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs text-gray-700 dark:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    >
+                      <span className={fieldSelectorState.mode === 'all' ? 'text-gray-400 dark:text-slate-400' : 'text-blue-500 dark:text-blue-300'}>{triggerLabel}</span>
                         <svg className={`w-3 h-3 text-slate-500 transition-transform shrink-0 ${fieldDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                         </svg>
                       </button>
                       {fieldDropdownOpen && (
-                        <div className="absolute z-30 mt-1 w-full min-w-[200px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
-                          <div className="relative border-b border-slate-700">
-                            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <div className="absolute z-30 mt-1 w-full min-w-[200px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                          <div className="relative border-b border-gray-200 dark:border-slate-700">
+                            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
                             </svg>
                             <input
@@ -2386,29 +2386,29 @@ export default function ResourcePage() {
                               value={fieldSearch}
                               onChange={(e) => setFieldSearch(e.target.value)}
                               placeholder="Filter fields…"
-                              className="w-full pl-7 pr-7 py-1.5 text-xs bg-transparent text-slate-200 placeholder-slate-500 focus:outline-none"
+                              className="w-full pl-7 pr-7 py-1.5 text-xs bg-transparent text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none"
                             />
                             {fieldSearch && (
-                              <button onClick={() => setFieldSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300" aria-label="Clear search">
+                              <button onClick={() => setFieldSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300" aria-label="Clear search">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                               </button>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-700/60">
-                            <button onClick={() => setFieldSelectorState({ mode: 'all', selected: new Set() })} className="text-[10px] text-slate-400 hover:text-slate-200 underline">All</button>
-                            <button onClick={() => { setFieldSelectorState({ mode: 'none', selected: new Set() }); setHiddenFields(new Set()) }} className="text-[10px] text-slate-400 hover:text-slate-200 underline">None</button>
+                          <div className="flex items-center gap-3 px-3 py-1.5 border-b border-gray-200 dark:border-slate-700/60">
+                            <button onClick={() => setFieldSelectorState({ mode: 'all', selected: new Set() })} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">All</button>
+                            <button onClick={() => { setFieldSelectorState({ mode: 'none', selected: new Set() }); setHiddenFields(new Set()) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">None</button>
                           </div>
                           <div className="max-h-52 overflow-y-auto py-1">
                             {availableFields.length === 0 ? (
-                              <p className="px-3 py-2 text-xs text-slate-500">No fields found.</p>
+                              <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No fields found.</p>
                             ) : filteredFields.length === 0 ? (
-                              <p className="px-3 py-2 text-xs text-slate-500">No match for &ldquo;{fieldSearch}&rdquo;.</p>
+                              <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No match for &ldquo;{fieldSearch}&rdquo;.</p>
                             ) : filteredFields.map((field) => {
                               const checked = isFieldChecked(field, fieldSelectorState)
                               return (
-                                <label key={field} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-slate-800 group">
+                                <label key={field} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 group">
                                   <input
                                     type="checkbox"
                                     checked={checked}
@@ -2430,7 +2430,7 @@ export default function ResourcePage() {
                                     }}
                                     className="w-3.5 h-3.5 rounded accent-blue-500 cursor-pointer shrink-0"
                                   />
-                                  <span className="text-xs font-mono text-slate-300 group-hover:text-white truncate">{field}</span>
+                                  <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white truncate">{field}</span>
                                 </label>
                               )
                             })}
@@ -2441,7 +2441,7 @@ export default function ResourcePage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Hidden Fields</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Hidden Fields</p>
                     <div className="relative" ref={hiddenFieldDropdownRef}>
                       {(() => {
                         const retrievedFields = availableFields.filter((field) => isFieldChecked(field, fieldSelectorState))
@@ -2456,17 +2456,17 @@ export default function ResourcePage() {
                             <button
                               type="button"
                               onClick={() => setHiddenFieldDropdownOpen((v) => !v)}
-                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-300 hover:border-slate-500 hover:text-white transition-colors"
+                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs text-gray-700 dark:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
-                              <span className={hiddenRetrievedCount > 0 ? 'text-amber-300' : 'text-slate-400'}>{hiddenTriggerLabel}</span>
+                              <span className={hiddenRetrievedCount > 0 ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-slate-400'}>{hiddenTriggerLabel}</span>
                               <svg className={`w-3 h-3 text-slate-500 transition-transform shrink-0 ${hiddenFieldDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                               </svg>
                             </button>
                             {hiddenFieldDropdownOpen && (
-                              <div className="absolute z-30 mt-1 w-full min-w-[220px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
-                                <div className="relative border-b border-slate-700">
-                                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <div className="absolute z-30 mt-1 w-full min-w-[220px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                                <div className="relative border-b border-gray-200 dark:border-slate-700">
+                                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
                                   </svg>
                                   <input
@@ -2474,39 +2474,39 @@ export default function ResourcePage() {
                                     value={hiddenFieldSearch}
                                     onChange={(e) => setHiddenFieldSearch(e.target.value)}
                                     placeholder="Filter retrieved fields…"
-                                    className="w-full pl-7 pr-7 py-1.5 text-xs bg-transparent text-slate-200 placeholder-slate-500 focus:outline-none"
+                                    className="w-full pl-7 pr-7 py-1.5 text-xs bg-transparent text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none"
                                   />
                                   {hiddenFieldSearch && (
-                                    <button onClick={() => setHiddenFieldSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300" aria-label="Clear hidden field search">
+                                    <button onClick={() => setHiddenFieldSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300" aria-label="Clear hidden field search">
                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                       </svg>
                                     </button>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-700/60">
+                                <div className="flex items-center gap-3 px-3 py-1.5 border-b border-gray-200 dark:border-slate-700/60">
                                   <button
                                     onClick={() => setHiddenFields(new Set(retrievedFields))}
-                                    className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                                    className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                                   >
                                     All
                                   </button>
                                   <button
                                     onClick={() => setHiddenFields(new Set())}
-                                    className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                                    className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                                   >
                                     None
                                   </button>
                                 </div>
                                 <div className="max-h-52 overflow-y-auto py-1">
                                   {retrievedFields.length === 0 ? (
-                                    <p className="px-3 py-2 text-xs text-slate-500">No retrieved fields selected.</p>
+                                    <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No retrieved fields selected.</p>
                                   ) : filteredRetrievedFields.length === 0 ? (
-                                    <p className="px-3 py-2 text-xs text-slate-500">No match for &ldquo;{hiddenFieldSearch}&rdquo;.</p>
+                                    <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No match for &ldquo;{hiddenFieldSearch}&rdquo;.</p>
                                   ) : filteredRetrievedFields.map((field) => {
                                     const checked = hiddenFields.has(field)
                                     return (
-                                      <label key={field} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-slate-800 group">
+                                      <label key={field} className="flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 group">
                                         <input
                                           type="checkbox"
                                           checked={checked}
@@ -2520,7 +2520,7 @@ export default function ResourcePage() {
                                           }}
                                           className="w-3.5 h-3.5 rounded accent-amber-500 cursor-pointer shrink-0"
                                         />
-                                        <span className="text-xs font-mono text-slate-300 group-hover:text-white truncate">{field}</span>
+                                        <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white truncate">{field}</span>
                                       </label>
                                     )
                                   })}
@@ -2548,9 +2548,9 @@ export default function ResourcePage() {
           {/* ── Field where-filter builder (separate section) ── */}
           {navItem.hasFilterWhere && (
             <>
-              <hr className="border-slate-700" />
+              <hr className="border-gray-200 dark:border-slate-700" />
               <div className="space-y-1.5">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Field Filters</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Field Filters</p>
                 <div className="space-y-2.5">
                   {stagedWhereClauses.length > 0 && (
                     <div className="space-y-2">
@@ -2562,7 +2562,7 @@ export default function ResourcePage() {
                             <select
                               value={clause.field}
                               onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, field: e.target.value } : c))}
-                              className="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             >
                               <option value="">field…</option>
                               {availableFields.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -2570,7 +2570,7 @@ export default function ResourcePage() {
                             <select
                               value={clause.op}
                               onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, op: e.target.value } : c))}
-                              className="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             >
                               {WHERE_OPERATOR_OPTIONS.map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
                             </select>
@@ -2580,7 +2580,7 @@ export default function ResourcePage() {
                                 value={clause.value}
                                 onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, value: e.target.value } : c))}
                                 placeholder={isListOp ? 'v1, v2, v3' : 'value'}
-                                className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                               />
                               {needsSecondValue && (
                                 <input
@@ -2588,7 +2588,7 @@ export default function ResourcePage() {
                                   value={clause.value2}
                                   onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, value2: e.target.value } : c))}
                                   placeholder="second value"
-                                  className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 />
                               )}
                             </div>
@@ -2610,17 +2610,17 @@ export default function ResourcePage() {
 
                   {stagedWhereClauses.length > 1 && (
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider">Join staged with</span>
-                      <div className="inline-flex rounded border border-slate-700 overflow-hidden">
+                      <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Join staged with</span>
+                      <div className="inline-flex rounded border border-gray-200 dark:border-slate-700 overflow-hidden">
                         {['and', 'or'].map((op) => (
                           <button
                             key={op}
                             type="button"
                             onClick={() => setWhereInternalOp(op)}
-                            className={`px-2 py-0.5 text-[10px] font-mono uppercase border-r border-slate-700 last:border-r-0 transition-colors ${
+                            className={`px-2 py-0.5 text-[10px] font-mono uppercase border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                               whereInternalOp === op
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
                             }`}
                           >
                             {op}
@@ -2634,7 +2634,7 @@ export default function ResourcePage() {
                     <button
                       type="button"
                       onClick={() => setStagedWhereClauses((prev) => [...prev, makeEmptyWhereClause()])}
-                      className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                      className="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                     >
                       Add Clause
                     </button>
@@ -2651,7 +2651,7 @@ export default function ResourcePage() {
                             setWhereInternalOp('and')
                             setPage(0)
                           }}
-                          className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                          className="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                         >
                           Apply
                         </button>
@@ -2669,7 +2669,7 @@ export default function ResourcePage() {
                             setPage(0)
                           }}
                           disabled={stagedWhereClauses.length === 0}
-                          className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           +and
                         </button>
@@ -2684,7 +2684,7 @@ export default function ResourcePage() {
                             setPage(0)
                           }}
                           disabled={stagedWhereClauses.length === 0}
-                          className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           +or
                         </button>
@@ -2695,7 +2695,7 @@ export default function ResourcePage() {
                       <button
                         type="button"
                         onClick={() => { setStagedWhereClauses([]); setWhereInternalOp('and') }}
-                        className="px-2 py-1 text-xs text-slate-500 hover:text-slate-200"
+                        className="px-2 py-1 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200"
                       >
                         Clear staged
                       </button>
@@ -2716,14 +2716,14 @@ export default function ResourcePage() {
           {/* Sort */}
           {navItem.hasFilterOrder && (
             <>
-              <hr className="border-slate-700" />
+              <hr className="border-gray-200 dark:border-slate-700" />
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Sort</p>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Sort</p>
                   {sortOrder.length > 0 && (
                     <button
                       onClick={() => { setSortOrder([]); setPage(0) }}
-                      className="text-xs text-slate-400 hover:text-slate-200 underline"
+                      className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                     >
                       Clear
                     </button>
@@ -2732,17 +2732,17 @@ export default function ResourcePage() {
 
                 {sortOrder.map((entry, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono text-slate-500 w-4 flex-shrink-0">{i + 1}.</span>
+                    <span className="text-[10px] font-mono text-gray-400 dark:text-slate-500 w-4 flex-shrink-0">{i + 1}.</span>
                     <select
                       value={entry.field}
                       onChange={(e) => setSortOrder((prev) => prev.map((s, idx) => idx === i ? { ...s, field: e.target.value } : s))}
-                      className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="flex-1 min-w-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
                       {availableFields.map((f) => <option key={f} value={f}>{f}</option>)}
                     </select>
                     <button
                       onClick={() => setSortOrder((prev) => prev.map((s, idx) => idx === i ? { ...s, dir: s.dir === 'ASC' ? 'DESC' : 'ASC' } : s))}
-                      className="inline-flex items-center gap-1 px-2 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors font-mono flex-shrink-0"
+                      className="inline-flex items-center gap-1 px-2 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors font-mono flex-shrink-0"
                     >
                       {entry.dir === 'ASC' ? (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
@@ -2769,7 +2769,7 @@ export default function ResourcePage() {
 
                 <button
                   onClick={() => setSortOrder((prev) => [...prev, { field: availableFields[0] ?? '_id', dir: 'ASC' }])}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -2778,7 +2778,7 @@ export default function ResourcePage() {
                 </button>
 
                 {sortOrder.length > 0 && (
-                  <p className="text-[10px] text-slate-500 font-mono">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">
                     {sortOrder.map((s) => `${s.field} ${s.dir}`).join(', ')}
                   </p>
                 )}
@@ -2786,42 +2786,42 @@ export default function ResourcePage() {
             </>
           )}
 
-          <hr className="border-slate-700" />
+          <hr className="border-gray-200 dark:border-slate-700" />
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Row Visibility</p>
-              <span className="text-[10px] text-slate-500 font-mono">
+              <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Row Visibility</p>
+              <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">
                 hidden ids: {hiddenRecordIds.size}
               </span>
             </div>
 
-            <div className="inline-flex rounded-lg border border-slate-700 overflow-hidden">
+            <div className="inline-flex rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
               <button
                 type="button"
                 onClick={() => setHideMarkedRows(true)}
-                className={`px-3 py-1.5 text-xs transition-colors ${hideMarkedRows ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'}`}
+                className={`px-3 py-1.5 text-xs transition-colors ${hideMarkedRows ? 'bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
               >
                 Hide marked rows
               </button>
-              <span className="w-px bg-slate-700" />
+              <span className="w-px bg-gray-200 dark:bg-slate-700" />
               <button
                 type="button"
                 onClick={() => setHideMarkedRows(false)}
-                className={`px-3 py-1.5 text-xs transition-colors ${!hideMarkedRows ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'}`}
+                className={`px-3 py-1.5 text-xs transition-colors ${!hideMarkedRows ? 'bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
               >
                 Show all rows
               </button>
             </div>
 
             {hiddenRecordIds.size === 0 ? (
-              <p className="text-xs text-slate-500">No hidden records.</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500">No hidden records.</p>
             ) : (
               <>
                 <div className="flex flex-wrap gap-1.5">
                   {[...hiddenRecordIds].map((id) => (
-                    <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[10px] text-slate-300" title={id}>
+                    <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-[10px] text-gray-700 dark:text-slate-300" title={id}>
                       <span className="max-w-[220px] truncate">{hiddenRecordMeta[id]?.name || 'no _name'}</span>
-                      <span className="text-slate-500 font-mono">{shortId(id)}</span>
+                      <span className="text-gray-400 dark:text-slate-500 font-mono">{shortId(id)}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -2837,7 +2837,7 @@ export default function ResourcePage() {
                             return next
                           })
                         }}
-                        className="text-slate-500 hover:text-slate-200"
+                        className="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200"
                         title="Unhide record"
                         aria-label="Unhide record"
                       >
@@ -2854,7 +2854,7 @@ export default function ResourcePage() {
                     setHiddenRecordIds(new Set())
                     setHiddenRecordMeta({})
                   }}
-                  className="text-xs text-slate-400 hover:text-slate-200 underline"
+                  className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline"
                 >
                   Unhide all records
                 </button>
@@ -2872,13 +2872,13 @@ export default function ResourcePage() {
             onClick={() => setCreateOpen(false)}
           />
           {/* Modal panel */}
-          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl">
           {/* Header */}
           <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
-            <p className="text-sm font-semibold text-slate-200">Create new item</p>
+            <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">Create new item</p>
             <button
               onClick={() => setCreateOpen(false)}
-              className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white transition-colors"
+              className="flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               aria-label="Close"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -2889,13 +2889,13 @@ export default function ResourcePage() {
 
           {/* Tab bar */}
           {writableFields.length > 0 && (
-            <div className="flex border-b border-slate-700 px-4 shrink-0">
+            <div className="flex border-b border-gray-200 dark:border-slate-700 px-4 shrink-0">
               <button
                 onClick={() => handleCreateTabSwitch('form')}
                 className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
                   createTab === 'form'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-blue-500 text-blue-500 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                 }`}
               >
                 Form
@@ -2904,8 +2904,8 @@ export default function ResourcePage() {
                 onClick={() => handleCreateTabSwitch('json')}
                 className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
                   createTab === 'json'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-blue-500 text-blue-500 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                 }`}
               >
                 JSON
@@ -2923,7 +2923,7 @@ export default function ResourcePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                   {primaryCreateFields.map((field) => (
                     <div key={field.name} className="flex flex-col gap-1">
-                      <label className="text-xs text-slate-400 font-mono flex items-center gap-0.5">
+                      <label className="text-xs text-gray-500 dark:text-slate-400 font-mono flex items-center gap-0.5">
                         {field.name}
                         {field.required && <span className="text-red-400">*</span>}
                       </label>
@@ -2933,20 +2933,20 @@ export default function ResourcePage() {
                         (v) => setCreateFormValues((prev) => ({ ...prev, [field.name]: v }))
                       )}
                       {field.description && (
-                        <p className="text-[10px] text-slate-500">{field.description}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500">{field.description}</p>
                       )}
                     </div>
                   ))}
                 </div>
               )}
               {primaryCreateFields.length > 0 && managedCreateFields.length > 0 && (
-                <hr className="border-slate-700" />
+                <hr className="border-gray-200 dark:border-slate-700" />
               )}
               {managedCreateFields.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                   {managedCreateFields.map((field) => (
                     <div key={field.name} className="flex flex-col gap-1">
-                      <label className="text-xs text-slate-400 font-mono flex items-center gap-0.5">
+                      <label className="text-xs text-gray-500 dark:text-slate-400 font-mono flex items-center gap-0.5">
                         {field.name}
                         {field.required && <span className="text-red-400">*</span>}
                       </label>
@@ -2956,7 +2956,7 @@ export default function ResourcePage() {
                         (v) => setCreateFormValues((prev) => ({ ...prev, [field.name]: v }))
                       )}
                       {field.description && (
-                        <p className="text-[10px] text-slate-500">{field.description}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500">{field.description}</p>
                       )}
                     </div>
                   ))}
@@ -2971,7 +2971,7 @@ export default function ResourcePage() {
               rows={12}
               value={createPayload}
               onChange={(e) => setCreatePayload(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-3 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           )}
 
@@ -2986,7 +2986,7 @@ export default function ResourcePage() {
             </button>
             <button
               onClick={() => setCreateOpen(false)}
-              className="px-3 py-1.5 text-sm rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300"
+              className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300"
             >
               Cancel
             </button>
@@ -3014,15 +3014,15 @@ export default function ResourcePage() {
       {traversalCreateState && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setTraversalCreateState(null)} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
-              <p className="text-sm font-semibold text-slate-200">
-                Add to <span className="text-blue-400">{traversalCreateState.traversal.label}</span>
+              <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">
+                Add to <span className="text-blue-500 dark:text-blue-400">{traversalCreateState.traversal.label}</span>
               </p>
               <button
                 onClick={() => setTraversalCreateState(null)}
-                className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white transition-colors"
+                className="flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 aria-label="Close"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -3033,13 +3033,13 @@ export default function ResourcePage() {
 
             {/* Tab bar */}
             {traversalCreateWritableFields.length > 0 && (
-              <div className="flex border-b border-slate-700 px-4 shrink-0">
+              <div className="flex border-b border-gray-200 dark:border-slate-700 px-4 shrink-0">
                 <button
                   onClick={() => handleTraversalCreateTabSwitch('form')}
                   className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
                     traversalCreateTab === 'form'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                      ? 'border-blue-500 text-blue-500 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                   }`}
                 >
                   Form
@@ -3048,8 +3048,8 @@ export default function ResourcePage() {
                   onClick={() => handleTraversalCreateTabSwitch('json')}
                   className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
                     traversalCreateTab === 'json'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                      ? 'border-blue-500 text-blue-500 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                   }`}
                 >
                   JSON
@@ -3073,7 +3073,7 @@ export default function ResourcePage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                         {orderedPrimary.map((field) => (
                           <div key={field.name} className="flex flex-col gap-1">
-                            <label className="text-xs text-slate-400 font-mono flex items-center gap-0.5">
+                            <label className="text-xs text-gray-500 dark:text-slate-400 font-mono flex items-center gap-0.5">
                               {field.name}
                               {field.required && <span className="text-red-400">*</span>}
                             </label>
@@ -3082,17 +3082,17 @@ export default function ResourcePage() {
                               traversalCreateFormValues[field.name],
                               (v) => setTraversalCreateFormValues((prev) => ({ ...prev, [field.name]: v }))
                             )}
-                            {field.description && <p className="text-[10px] text-slate-500">{field.description}</p>}
+                            {field.description && <p className="text-[10px] text-gray-400 dark:text-slate-500">{field.description}</p>}
                           </div>
                         ))}
                       </div>
                     )}
-                    {orderedPrimary.length > 0 && managedFields.length > 0 && <hr className="border-slate-700" />}
+                    {orderedPrimary.length > 0 && managedFields.length > 0 && <hr className="border-gray-200 dark:border-slate-700" />}
                     {managedFields.length > 0 && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                         {managedFields.map((field) => (
                           <div key={field.name} className="flex flex-col gap-1">
-                            <label className="text-xs text-slate-400 font-mono flex items-center gap-0.5">
+                            <label className="text-xs text-gray-500 dark:text-slate-400 font-mono flex items-center gap-0.5">
                               {field.name}
                               {field.required && <span className="text-red-400">*</span>}
                             </label>
@@ -3101,7 +3101,7 @@ export default function ResourcePage() {
                               traversalCreateFormValues[field.name],
                               (v) => setTraversalCreateFormValues((prev) => ({ ...prev, [field.name]: v }))
                             )}
-                            {field.description && <p className="text-[10px] text-slate-500">{field.description}</p>}
+                            {field.description && <p className="text-[10px] text-gray-400 dark:text-slate-500">{field.description}</p>}
                           </div>
                         ))}
                       </div>
@@ -3116,7 +3116,7 @@ export default function ResourcePage() {
                   rows={12}
                   value={traversalCreatePayload}
                   onChange={(e) => setTraversalCreatePayload(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-3 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   spellCheck={false}
                   autoFocus={traversalCreateWritableFields.length === 0}
                 />
@@ -3125,7 +3125,7 @@ export default function ResourcePage() {
             </div>
 
             {/* Sticky footer: error + actions */}
-            <div className="px-4 pb-4 pt-3 space-y-3 shrink-0 border-t border-slate-700/50">
+            <div className="px-4 pb-4 pt-3 space-y-3 shrink-0 border-t border-gray-200 dark:border-slate-700/50">
               {/* Validation errors */}
               {traversalCreateError && (
                 <div className="text-red-400 text-sm space-y-1">
@@ -3150,7 +3150,7 @@ export default function ResourcePage() {
                 </button>
                 <button
                   onClick={() => setTraversalCreateState(null)}
-                  className="px-3 py-1.5 text-sm rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300"
+                  className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300"
                 >
                   Cancel
                 </button>
@@ -3164,18 +3164,18 @@ export default function ResourcePage() {
       {listRelateState && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setListRelateState(null)} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
               <div>
-                <p className="text-sm font-semibold text-slate-200">
+                <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">
                   {listRelateState.mode === 'entity-pick' ? 'Add entity to list' : 'Relate to existing list'}
                 </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">via <span className="text-slate-400">{listRelateState.traversal.label}</span></p>
+                <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">via <span className="text-gray-600 dark:text-slate-400">{listRelateState.traversal.label}</span></p>
               </div>
               <button
                 onClick={() => setListRelateState(null)}
-                className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white transition-colors"
+                className="flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 aria-label="Close"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -3190,7 +3190,7 @@ export default function ResourcePage() {
               {/* Relationship type selector (shown only when multiple options exist) */}
               {(listRelateState.relevantRelations ?? listRelationNavItems).length > 1 && (
                 <div className="space-y-1.5">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Relationship type</p>
+                  <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Relationship type</p>
                   <div className="flex flex-wrap gap-2">
                     {(listRelateState.relevantRelations ?? listRelationNavItems).map((ri) => (
                       <button
@@ -3199,7 +3199,7 @@ export default function ResourcePage() {
                         className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
                           listRelateRelation?.id === ri.id
                             ? 'bg-blue-700 border-blue-500 text-white'
-                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-500'
+                            : 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500'
                         }`}
                       >
                         {ri.label}
@@ -3211,7 +3211,7 @@ export default function ResourcePage() {
 
               {/* Item picker (entity or list depending on mode) */}
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
+                <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">
                   {listRelateState.mode === 'entity-pick' ? 'Select entity' : 'Select list'}
                   {listRelateSelectedList && (
                     <span className="ml-2 normal-case font-normal text-emerald-400">
@@ -3220,7 +3220,7 @@ export default function ResourcePage() {
                   )}
                 </p>
                 <div className="relative">
-                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
                   </svg>
                   <input
@@ -3228,15 +3228,15 @@ export default function ResourcePage() {
                     value={listRelateSearch}
                     onChange={(e) => { setListRelateSearch(e.target.value); setListRelatePage(0) }}
                     placeholder="Search by name…"
-                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-                <div className="rounded-lg border border-slate-700 overflow-hidden">
+                <div className="rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
                   {listRelateSearchLoading && (
-                    <div className="flex items-center justify-center py-6 text-slate-500 text-xs">Loading…</div>
+                    <div className="flex items-center justify-center py-6 text-gray-400 dark:text-slate-500 text-xs">Loading…</div>
                   )}
                   {!listRelateSearchLoading && listRelateResults.length === 0 && (
-                    <div className="flex items-center justify-center py-6 text-slate-500 text-xs">No results</div>
+                    <div className="flex items-center justify-center py-6 text-gray-400 dark:text-slate-500 text-xs">No results</div>
                   )}
                   {!listRelateSearchLoading && listRelateResults.map((r) => {
                     const id = r._id ?? r.id
@@ -3245,12 +3245,12 @@ export default function ResourcePage() {
                       <button
                         key={id}
                         onClick={() => setListRelateSelectedList(r)}
-                        className={`w-full text-left flex items-center justify-between px-3 py-2 text-xs border-b border-slate-800 last:border-0 transition-colors ${
-                          isSelected ? 'bg-blue-900/40 text-blue-300' : 'hover:bg-slate-800 text-slate-300'
+                        className={`w-full text-left flex items-center justify-between px-3 py-2 text-xs border-b border-gray-100 dark:border-slate-800 last:border-0 transition-colors ${
+                          isSelected ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300'
                         }`}
                       >
                         <span className="font-mono truncate">{r._name ?? id}</span>
-                        <span className="shrink-0 ml-2 text-[10px] text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">{r._sourceNavItem?.label ?? ''}</span>
+                        <span className="shrink-0 ml-2 text-[10px] text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{r._sourceNavItem?.label ?? ''}</span>
                       </button>
                     )
                   })}
@@ -3261,13 +3261,13 @@ export default function ResourcePage() {
                     <button
                       onClick={() => setListRelatePage((p) => Math.max(0, p - 1))}
                       disabled={listRelatePage === 0}
-                      className="text-[10px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="text-[10px] px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
                     >← Prev</button>
-                    <span className="text-[10px] text-slate-500">Page {listRelatePage + 1}</span>
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500">Page {listRelatePage + 1}</span>
                     <button
                       onClick={() => setListRelatePage((p) => p + 1)}
                       disabled={!listRelateHasMore}
-                      className="text-[10px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="text-[10px] px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
                     >Next →</button>
                   </div>
                 )}
@@ -3293,13 +3293,13 @@ export default function ResourcePage() {
               {/* Extra relation fields */}
               {listRelateRelation && listRelateWritableFields.length > 0 && (
                 <>
-                  <hr className="border-slate-700" />
+                  <hr className="border-gray-200 dark:border-slate-700" />
                   <div className="space-y-1.5">
-                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Relationship details</p>
+                    <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Relationship details</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                       {listRelateWritableFields.map((field) => (
                         <div key={field.name} className="flex flex-col gap-1">
-                          <label className="text-xs text-slate-400 font-mono flex items-center gap-0.5">
+                          <label className="text-xs text-gray-500 dark:text-slate-400 font-mono flex items-center gap-0.5">
                             {field.name}
                             {field.required && <span className="text-red-400">*</span>}
                           </label>
@@ -3308,7 +3308,7 @@ export default function ResourcePage() {
                             listRelateFormValues[field.name],
                             (v) => setListRelateFormValues((prev) => ({ ...prev, [field.name]: v }))
                           )}
-                          {field.description && <p className="text-[10px] text-slate-500">{field.description}</p>}
+                          {field.description && <p className="text-[10px] text-gray-400 dark:text-slate-500">{field.description}</p>}
                         </div>
                       ))}
                     </div>
@@ -3318,7 +3318,7 @@ export default function ResourcePage() {
             </div>
 
             {/* Sticky footer: error + actions */}
-            <div className="px-4 pb-4 pt-3 space-y-3 shrink-0 border-t border-slate-700/50">
+            <div className="px-4 pb-4 pt-3 space-y-3 shrink-0 border-t border-gray-200 dark:border-slate-700/50">
               {/* Error */}
               {listRelateError && (
                 <div className="text-red-400 text-sm space-y-1">
@@ -3343,7 +3343,7 @@ export default function ResourcePage() {
                 </button>
                 <button
                   onClick={() => setListRelateState(null)}
-                  className="px-3 py-1.5 text-sm rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300"
+                  className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300"
                 >
                   Cancel
                 </button>
@@ -3409,9 +3409,9 @@ export default function ResourcePage() {
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          {!loading && !error && (
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+      <div className="min-w-0 space-y-1">
+        {!loading && !error && (
+          <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-slate-500 font-mono">
               <span>
                 {`${data.length} record(s) returned`}
               </span>
@@ -3424,18 +3424,18 @@ export default function ResourcePage() {
           <button
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0 || loading}
-            className="px-3 py-1.5 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
           <button
             onClick={() => setPage((p) => p + 1)}
             disabled={!hasNextPage || loading}
-            className="px-3 py-1.5 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>
-          <label className="text-xs text-slate-400 flex items-center gap-1.5">
+          <label className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1.5">
             Page size
             <select
               value={pageSize}
@@ -3443,7 +3443,7 @@ export default function ResourcePage() {
                 setPageSize(Number(e.target.value))
                 setPage(0)
               }}
-              className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-slate-300"
+              className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-md px-2 py-1 text-gray-700 dark:text-slate-300"
             >
               {[10, 25, 50, 100].map((size) => (
                 <option key={size} value={size}>
@@ -3452,7 +3452,7 @@ export default function ResourcePage() {
               ))}
             </select>
           </label>
-          <span className="text-xs text-slate-500 font-mono">
+          <span className="text-xs text-gray-400 dark:text-slate-500 font-mono">
             page={page + 1} offset={page * pageSize}
           </span>
         </div>
@@ -3513,7 +3513,7 @@ export default function ResourcePage() {
 
       {queryInfoOpen && (
         <div
-          className="flex-shrink-0 border-l border-slate-700 bg-slate-900 flex flex-col overflow-hidden relative"
+          className="flex-shrink-0 border-l border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex flex-col overflow-hidden relative"
           style={{ width: sidebarWidth }}
         >
           {/* Resize handle */}
@@ -3524,15 +3524,15 @@ export default function ResourcePage() {
           />
 
           {/* Tabs + close button */}
-          <div className="flex items-center border-b border-slate-800 flex-shrink-0">
+          <div className="flex items-center border-b border-gray-200 dark:border-slate-800 flex-shrink-0">
             {['request', 'identity'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setQueryInfoTab(tab)}
                 className={`flex-1 py-2 text-xs font-medium capitalize transition-colors ${
                   queryInfoTab === tab
-                    ? 'text-blue-400 border-b-2 border-blue-500 -mb-px bg-slate-900'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? 'text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 -mb-px bg-white dark:bg-slate-900'
+                    : 'text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
                 }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -3540,7 +3540,7 @@ export default function ResourcePage() {
             ))}
             <button
               onClick={() => setQueryInfoOpen(false)}
-              className="px-3 py-2 text-slate-500 hover:text-slate-300"
+              className="px-3 py-2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300"
               aria-label="Close"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -3559,21 +3559,21 @@ export default function ResourcePage() {
             <>
             {/* ── REQUEST ── */}
             <div className="space-y-3">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Request</p>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Request</p>
 
               {/* Method badge + URL/cURL toggle */}
               <div className="flex items-center justify-between gap-2">
                 <span className="px-2 py-0.5 text-xs font-mono font-bold rounded bg-blue-700 text-white tracking-wide">GET</span>
-                <div className="flex items-center bg-slate-800 rounded-md p-0.5 text-xs gap-0.5">
+                <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-md p-0.5 text-xs gap-0.5">
                   <button
                     onClick={() => setCurlMode(false)}
-                    className={`px-2.5 py-0.5 rounded transition-colors ${!curlMode ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                    className={`px-2.5 py-0.5 rounded transition-colors ${!curlMode ? 'bg-gray-300 dark:bg-slate-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'}`}
                   >
                     URL
                   </button>
                   <button
                     onClick={() => setCurlMode(true)}
-                    className={`px-2.5 py-0.5 rounded transition-colors ${curlMode ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                    className={`px-2.5 py-0.5 rounded transition-colors ${curlMode ? 'bg-gray-300 dark:bg-slate-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'}`}
                   >
                     cURL
                   </button>
@@ -3585,8 +3585,8 @@ export default function ResourcePage() {
                 onClick={handleCopy}
                 className={`w-full text-left text-xs font-mono rounded-lg px-3 py-2 border flex items-start gap-2 group transition-colors ${
                   copied
-                    ? 'bg-emerald-900/30 border-emerald-700 text-emerald-300'
-                    : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-gray-50 dark:bg-slate-950 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 hover:border-gray-400 dark:hover:border-slate-600'
                 }`}
               >
                 <span className="flex-1 break-all whitespace-pre-wrap">{curlMode ? curlCommand : fullRequestUrl}</span>
@@ -3616,7 +3616,7 @@ export default function ResourcePage() {
                 if (!keys.length) return null
                 return (
                   <div className="space-y-1.5">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Set filter</p>
+                        <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Set filter</p>
                     <div className="flex flex-wrap gap-1.5">
                       {keys.map((k) => (
                         <span key={k} className="px-2 py-0.5 text-xs rounded-md bg-violet-600/20 text-violet-300 border border-violet-700 font-mono">{k}</span>
@@ -3638,7 +3638,7 @@ export default function ResourcePage() {
                 if (!conditions.length) return null
                 return (
                   <div className="space-y-1.5">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Field filter</p>
+                    <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Field filter</p>
                     <div className="flex flex-wrap gap-1.5">
                       {conditions.map((c, idx) => (
                         <span key={`${c.field}-${c.op}-${idx}`} className="px-2 py-0.5 text-xs rounded-md bg-blue-600/20 text-blue-300 border border-blue-700 font-mono">
@@ -3659,7 +3659,7 @@ export default function ResourcePage() {
             {/* ── RESPONSE ── */}
             {responseStatus !== null && (
               <div className="space-y-3">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Response</p>
+                <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Response</p>
 
                 {/* Status + Duration */}
                 <div className="flex items-center gap-3">
@@ -3667,19 +3667,19 @@ export default function ResourcePage() {
                     {responseStatus}
                   </span>
                   {queryDuration !== null && (
-                    <span className="text-xs text-slate-400 font-mono">{queryDuration} ms</span>
-                  )}
+                      <span className="text-xs text-gray-500 dark:text-slate-400 font-mono">{queryDuration} ms</span>
+                    )}
                 </div>
 
                 {/* Response headers */}
                 {responseHeaders && Object.keys(responseHeaders).length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Headers</p>
-                    <div className="rounded-lg border border-slate-800 divide-y divide-slate-800 overflow-hidden">
+                    <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Headers</p>
+                    <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
                       {Object.entries(responseHeaders).map(([key, value]) => (
-                        <div key={key} className="px-3 py-1.5 bg-slate-950">
-                          <p className="text-[10px] text-slate-500 font-mono">{key}</p>
-                          <p className="text-xs text-slate-300 font-mono break-all">{value}</p>
+                        <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
+                          <p className="text-xs text-gray-700 dark:text-slate-300 font-mono break-all">{value}</p>
                         </div>
                       ))}
                     </div>

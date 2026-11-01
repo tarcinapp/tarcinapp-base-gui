@@ -61,9 +61,9 @@ export default function TraversalPage() {
 
   if (!child) {
     return (
-      <div className="text-slate-400 text-sm p-4">
+      <div className="text-gray-500 dark:text-slate-400 text-sm p-4">
         Traversal endpoint not found:{' '}
-        <code className="font-mono bg-slate-800 px-1 rounded">
+        <code className="font-mono bg-gray-100 dark:bg-slate-800 px-1 rounded">
           {tagSlug}/{subResource}
         </code>
       </div>
@@ -86,7 +86,7 @@ export default function TraversalPage() {
           value={parentId}
           onChange={(e) => setParentId(e.target.value)}
           placeholder={`Enter ${singularLabel} ID…`}
-          className="flex-1 max-w-sm bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          className="flex-1 max-w-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-gray-800 dark:text-slate-100 text-sm placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
         />
         <button
           type="submit"
@@ -99,7 +99,7 @@ export default function TraversalPage() {
           <button
             type="button"
             onClick={refresh}
-            className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors"
+            className="flex items-center justify-center w-9 h-9 rounded-lg bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors"
             title="Refresh"
             aria-label="Refresh"
           >
@@ -112,7 +112,7 @@ export default function TraversalPage() {
 
       {submittedId && (
         <>
-          <p className="text-xs text-slate-500 font-mono">
+          <p className="text-xs text-gray-400 dark:text-slate-500 font-mono">
             {resolvedPath}
             {!loading && !error && ` · ${data.length} record(s)`}
             {` · ${paginationKeys.limitKey}=${pageSize}`}
@@ -128,30 +128,30 @@ export default function TraversalPage() {
           />
 
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={page === 0 || loading}
-              className="px-3 py-1.5 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0 || loading}
+            className="px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasNextPage || loading}
+            className="px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+          <label className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1.5">
+            Page size
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value))
+                setPage(0)
+              }}
+              className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-md px-2 py-1 text-gray-700 dark:text-slate-300"
             >
-              Previous
-            </button>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!hasNextPage || loading}
-              className="px-3 py-1.5 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-            <label className="text-xs text-slate-400 flex items-center gap-1.5">
-              Page size
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value))
-                  setPage(0)
-                }}
-                className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-slate-300"
-              >
                 {[10, 25, 50, 100].map((size) => (
                   <option key={size} value={size}>
                     {size}
@@ -159,7 +159,7 @@ export default function TraversalPage() {
                 ))}
               </select>
             </label>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-gray-400 dark:text-slate-500 font-mono">
               page={page + 1} offset={page * pageSize}
             </span>
           </div>

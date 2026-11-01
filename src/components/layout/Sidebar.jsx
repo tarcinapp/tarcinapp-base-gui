@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
+import { useTheme } from '../../context/ThemeContext'
 import { parseOasSpec } from '../../utils/oasParser'
 
 // Icon path per base type — used as a visual indicator on each nav item
@@ -54,17 +55,18 @@ function NavIcon({ d, size = 'w-3.5 h-3.5' }) {
 
 export default function Sidebar({ collapsed = false, onToggle }) {
   const { oasSpec, disconnect, retry, bypassCache, setBypassCache } = useApp()
+  const { theme, toggleTheme } = useTheme()
   const { navItems } = oasSpec ? parseOasSpec(oasSpec) : { navItems: [] }
   const navGroups = groupByBaseType(navItems)
 
   return (
     <aside
-      className={`flex flex-col min-h-screen bg-slate-900 border-r border-slate-800 transition-all duration-200 flex-shrink-0 ${
+      className={`flex flex-col min-h-screen bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 transition-all duration-200 flex-shrink-0 ${
         collapsed ? 'w-14' : 'w-56'
       }`}
     >
       {/* Brand */}
-      <div className={`flex items-center border-b border-slate-800 ${collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-5 py-3'}`}>
+      <div className={`flex items-center border-b border-gray-200 dark:border-slate-800 ${collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-5 py-3'}`}>
         <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -72,8 +74,8 @@ export default function Sidebar({ collapsed = false, onToggle }) {
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <p className="text-white font-semibold text-sm leading-none">Tarcinapp</p>
-            <p className="text-slate-400 text-xs mt-0.5 truncate">
+            <p className="text-gray-900 dark:text-white font-semibold text-sm leading-none">Tarcinapp</p>
+            <p className="text-gray-500 dark:text-slate-400 text-xs mt-0.5 truncate">
               {oasSpec?.info?.title ?? 'Entity Platform'}
             </p>
           </div>
@@ -93,7 +95,7 @@ export default function Sidebar({ collapsed = false, onToggle }) {
             } ${
               isActive
                 ? 'bg-blue-600 text-white font-medium'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-100'
             }`
           }
         >
@@ -104,7 +106,7 @@ export default function Sidebar({ collapsed = false, onToggle }) {
         {navGroups.map(({ baseType, items }) => (
           <div key={baseType}>
             {!collapsed && (
-              <p className="px-2 pt-3 pb-0.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              <p className="px-2 pt-3 pb-0.5 text-[10px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
                 {BASE_TYPE_LABEL[baseType] ?? baseType}
               </p>
             )}
@@ -122,7 +124,7 @@ export default function Sidebar({ collapsed = false, onToggle }) {
                         } ${
                           isActive
                             ? 'bg-blue-600 text-white font-medium'
-                            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                            : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-100'
                         }`
                       }
                     >
@@ -139,12 +141,12 @@ export default function Sidebar({ collapsed = false, onToggle }) {
       </nav>
 
       {/* Bottom actions */}
-      <div className={`py-3 border-t border-slate-800 ${collapsed ? 'flex flex-col items-center gap-1 px-2' : 'flex flex-row items-center gap-1 px-3'}`}>
+      <div className={`py-3 border-t border-gray-200 dark:border-slate-800 ${collapsed ? 'flex flex-col items-center gap-1 px-2' : 'flex flex-row items-center gap-1 px-3'}`}>
         <button
           onClick={retry}
           title="Reload OAS spec"
           aria-label="Reload OAS spec"
-          className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -157,7 +159,7 @@ export default function Sidebar({ collapsed = false, onToggle }) {
           aria-pressed={bypassCache}
           aria-label="Toggle cache"
           className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
-            bypassCache ? 'text-amber-400 hover:bg-slate-800' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+            bypassCache ? 'text-amber-500 hover:bg-gray-100 dark:hover:bg-slate-800' : 'text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'
           }`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
@@ -165,11 +167,29 @@ export default function Sidebar({ collapsed = false, onToggle }) {
           </svg>
         </button>
 
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          {theme === 'dark' ? (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          )}
+        </button>
+
         <button
           onClick={disconnect}
           title="Disconnect"
           aria-label="Disconnect"
-          className={`flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors${collapsed ? '' : ' ml-auto'}`}
+          className={`flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors${collapsed ? '' : ' ml-auto'}`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -179,4 +199,3 @@ export default function Sidebar({ collapsed = false, onToggle }) {
     </aside>
   )
 }
-

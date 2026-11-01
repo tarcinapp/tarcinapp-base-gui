@@ -11,7 +11,7 @@ export default function AppLayout() {
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopBar onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 overflow-y-auto bg-gray-950 p-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 p-6">
           <Outlet />
         </main>
       </div>

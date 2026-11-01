@@ -122,16 +122,16 @@ export default function VisualFilterBuilder({ expr, onChange }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700/60 min-h-[38px]">
-      <span className="text-[10px] text-slate-600 font-mono uppercase tracking-wider shrink-0">sets</span>
-      <span className="text-slate-700 text-xs shrink-0">›</span>
+    <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
+      <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">sets</span>
+      <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
       {tokens.map((token, i) => {
         if (token.type === 'set') {
           const setLabel = formatSetLabel(token.key)
           return (
             <span
               key={token.id}
-              className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded border text-xs font-mono bg-slate-800 border-slate-600 text-slate-300"
+              className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded border text-xs font-mono bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300"
             >
               {setLabel}
               <button
@@ -157,8 +157,8 @@ export default function VisualFilterBuilder({ expr, onChange }) {
               title="Click to toggle AND / OR"
               className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase border transition-colors ${
                 token.op === 'and'
-                  ? 'bg-blue-900/40 border-blue-700 text-blue-400 hover:bg-blue-700 hover:text-white'
-                  : 'bg-amber-900/40 border-amber-700 text-amber-400 hover:bg-amber-700 hover:text-white'
+                  ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-700 hover:text-white'
+                  : 'bg-amber-100 dark:bg-amber-900/40 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-600 dark:hover:bg-amber-700 hover:text-white'
               }`}
             >
               {token.op}
@@ -168,13 +168,13 @@ export default function VisualFilterBuilder({ expr, onChange }) {
 
         if (token.type === 'lparen') {
           return (
-            <span key={token.id} className="text-slate-300 text-base font-mono font-bold select-none leading-none">(</span>
+            <span key={token.id} className="text-gray-500 dark:text-slate-300 text-base font-mono font-bold select-none leading-none">(</span>
           )
         }
 
         if (token.type === 'rparen') {
           return (
-            <span key={token.id} className="text-slate-300 text-base font-mono font-bold select-none leading-none">)</span>
+            <span key={token.id} className="text-gray-500 dark:text-slate-300 text-base font-mono font-bold select-none leading-none">)</span>
           )
         }
 
@@ -185,7 +185,7 @@ export default function VisualFilterBuilder({ expr, onChange }) {
       <button
         type="button"
         onClick={() => onChange(null)}
-        className="ml-auto flex items-center justify-center w-5 h-5 rounded text-slate-600 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+        className="ml-auto flex items-center justify-center w-5 h-5 rounded text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
         title="Clear filter expression"
         aria-label="Clear filter expression"
       >

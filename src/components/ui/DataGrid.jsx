@@ -78,16 +78,16 @@ function TypeIcon({ type }) {
 
 function ManagedFieldValue({ fieldKey, value, type }) {
   if (value === undefined || value === null) {
-    return <span className="text-slate-600 italic text-xs">null</span>
+    return <span className="text-gray-300 dark:text-slate-600 italic text-xs">null</span>
   }
   const isArr = type === 'array' || Array.isArray(value)
   if (isArr) {
     const arr = Array.isArray(value) ? value : [value]
-    if (arr.length === 0) return <span className="text-slate-600 italic text-xs">empty array</span>
+    if (arr.length === 0) return <span className="text-gray-300 dark:text-slate-600 italic text-xs">empty array</span>
     return (
       <div className="flex flex-wrap gap-1.5 mt-0.5">
         {arr.map((item, idx) => (
-          <span key={idx} className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-mono">
+          <span key={idx} className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-xs font-mono">
             {String(item)}
           </span>
         ))}
@@ -96,75 +96,75 @@ function ManagedFieldValue({ fieldKey, value, type }) {
   }
   if (type === 'datetime') {
     return (
-      <span className="text-slate-200 text-xs font-mono" title={fmt(value)}>{timeAgo(value)}</span>
+      <span className="text-gray-700 dark:text-slate-200 text-xs font-mono" title={fmt(value)}>{timeAgo(value)}</span>
     )
   }
   if (type === 'object' && typeof value === 'object') {
     return (
-      <pre className="mt-0.5 text-xs font-mono text-slate-300 bg-slate-950 border border-slate-800 rounded-lg p-2.5 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+      <pre className="mt-0.5 text-xs font-mono text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-2.5 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
         {JSON.stringify(value, null, 2)}
       </pre>
     )
   }
   if (type === 'number') {
-    return <span className="text-sky-300 font-mono text-sm font-medium">{value}</span>
+    return <span className="text-sky-600 dark:text-sky-300 font-mono text-sm font-medium">{value}</span>
   }
   if (fieldKey === '_visibility') {
     const colors = {
-      public:    'bg-emerald-900/40 text-emerald-300 border-emerald-700/60',
-      protected: 'bg-amber-900/40 text-amber-300 border-amber-700/60',
-      private:   'bg-rose-900/40 text-rose-300 border-rose-700/60',
+      public:    'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700/60',
+      protected: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700/60',
+      private:   'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-700/60',
     }
     return (
-      <span className={`inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${colors[value] ?? 'bg-slate-800 text-slate-300 border-slate-700'}`}>
+      <span className={`inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${colors[value] ?? 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-200 dark:border-slate-700'}`}>
         {value}
       </span>
     )
   }
   if (fieldKey === '_recordType') {
     return (
-      <span className="inline-flex px-2 py-0.5 rounded-full bg-violet-900/40 border border-violet-700/60 text-violet-300 text-xs font-medium">
+      <span className="inline-flex px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/40 border border-violet-200 dark:border-violet-700/60 text-violet-600 dark:text-violet-300 text-xs font-medium">
         {value}
       </span>
     )
   }
-  return <span className="text-slate-200 font-mono text-xs break-all">{String(value)}</span>
+  return <span className="text-gray-700 dark:text-slate-200 font-mono text-xs break-all">{String(value)}</span>
 }
 
 function renderCompactValue(key, value, type) {
   if (value === null || value === undefined)
-    return <span className="text-slate-600 italic text-[11px]">—</span>
+    return <span className="text-gray-300 dark:text-slate-600 italic text-[11px]">—</span>
 
   if (type === 'array' || Array.isArray(value)) {
     const arr = Array.isArray(value) ? value : []
     if (arr.length === 0)
-      return <span className="text-slate-600 italic text-[11px]">empty</span>
+      return <span className="text-gray-300 dark:text-slate-600 italic text-[11px]">empty</span>
     const preview = arr.slice(0, 3).map(String).join(', ')
     return (
-      <span className="text-sky-300 text-[11px] font-mono" title={arr.join(', ')}>
-        {preview}{arr.length > 3 ? <span className="text-slate-500"> +{arr.length - 3}</span> : ''}
+      <span className="text-sky-600 dark:text-sky-300 text-[11px] font-mono" title={arr.join(', ')}>
+        {preview}{arr.length > 3 ? <span className="text-gray-400 dark:text-slate-500"> +{arr.length - 3}</span> : ''}
       </span>
     )
   }
   if (type === 'datetime') {
-    return <span className="text-violet-300 text-[11px] font-mono" title={fmt(value)}>{timeAgo(value)}</span>
+    return <span className="text-violet-500 dark:text-violet-300 text-[11px] font-mono" title={fmt(value)}>{timeAgo(value)}</span>
   }
   if (type === 'object' && typeof value === 'object') {
-    return <span className="text-emerald-400 text-[11px] font-mono cursor-help" title={JSON.stringify(value, null, 2)}>{'{…}'}</span>
+    return <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-mono cursor-help" title={JSON.stringify(value, null, 2)}>{'{…}'}</span>
   }
   if (type === 'number') {
-    return <span className="text-sky-300 text-[11px] font-mono">{value}</span>
+    return <span className="text-sky-600 dark:text-sky-300 text-[11px] font-mono">{value}</span>
   }
   if (key === '_visibility') {
-    const colors = { public: 'text-emerald-400', protected: 'text-amber-400', private: 'text-rose-400' }
-    return <span className={`text-[11px] font-medium ${colors[value] ?? 'text-slate-300'}`}>{value}</span>
+    const colors = { public: 'text-emerald-600 dark:text-emerald-400', protected: 'text-amber-600 dark:text-amber-400', private: 'text-rose-600 dark:text-rose-400' }
+    return <span className={`text-[11px] font-medium ${colors[value] ?? 'text-gray-600 dark:text-slate-300'}`}>{value}</span>
   }
   if (key === '_recordType') {
-    return <span className="text-violet-300 text-[11px]">{value}</span>
+    return <span className="text-violet-500 dark:text-violet-300 text-[11px]">{value}</span>
   }
   const str = String(value)
   const display = str.length > 32 ? `${str.slice(0, 14)}…${str.slice(-8)}` : str
-  return <span className="text-slate-200 text-[11px] font-mono" title={str.length > 32 ? str : undefined}>{display}</span>
+  return <span className="text-gray-700 dark:text-slate-200 text-[11px] font-mono" title={str.length > 32 ? str : undefined}>{display}</span>
 }
 
 const EXCLUDE_FROM_PANEL = new Set(['_id', '_name', '_kind', '_resolveItemPathTemplate'])
@@ -196,7 +196,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
     array:    'text-sky-400',
     number:   'text-sky-400',
     object:   'text-emerald-400',
-    string:   'text-slate-500',
+    string:   'text-gray-400 dark:text-slate-500',
   }
 
   const isExpandableObj = detectedType === 'object' && typeof value === 'object' && value !== null
@@ -218,11 +218,11 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
   return (
     <div className="py-1 min-w-0">
       <div className="flex items-center gap-2 min-w-0" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-        <span className={`flex-shrink-0 ${TYPE_COLOR[detectedType] ?? 'text-slate-500'}`}>
+        <span className={`flex-shrink-0 ${TYPE_COLOR[detectedType] ?? 'text-gray-400 dark:text-slate-500'}`}>
           <TypeIcon type={detectedType} />
         </span>
         <span className="inline-flex items-center gap-1 flex-shrink-0 w-36">
-          <span className="text-slate-500 text-[11px] font-mono truncate" title={fieldKey}>
+          <span className="text-gray-400 dark:text-slate-500 text-[11px] font-mono truncate" title={fieldKey}>
             {fieldKey}
           </span>
           {isResolvable && (
@@ -234,7 +234,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
                 resolvedObjects
                   ? 'text-violet-400'
                   : hovered
-                  ? 'text-slate-400 hover:text-violet-400'
+                  ? 'text-gray-400 dark:text-slate-400 hover:text-violet-400'
                   : 'text-transparent'
               }`}
               title="Resolve references"
@@ -272,7 +272,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
                     key={idx}
                     type="button"
                     onClick={() => onViewRecord?.(obj)}
-                    className="inline-flex items-center px-1.5 py-0.5 rounded border border-violet-700/60 bg-violet-900/30 text-violet-300 hover:bg-violet-800/50 hover:text-violet-100 font-mono text-[10px] transition-colors"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded border border-violet-300 dark:border-violet-700/60 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-800/50 hover:text-violet-700 dark:hover:text-violet-100 font-mono text-[10px] transition-colors"
                     title={objId}
                   >
                     {chipLabel}
@@ -281,7 +281,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
               })}
             </span>
           ) : resolvedObjects && resolvedObjects.length === 0 ? (
-            <span className="text-slate-600 italic text-[11px]">no objects resolved</span>
+            <span className="text-gray-300 dark:text-slate-600 italic text-[11px]">no objects resolved</span>
           ) : isExpandableObj ? (
             <button
               type="button"
@@ -299,7 +299,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
         </span>
       </div>
       {isExpandableObj && objectExpanded && !resolvedObjects && (
-        <pre className="ml-6 mt-1 text-xs font-mono text-slate-300 bg-slate-950 border border-slate-800 rounded-lg p-2 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+        <pre className="ml-6 mt-1 text-xs font-mono text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-2 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
           {JSON.stringify(value, null, 2)}
         </pre>
       )}
@@ -344,7 +344,7 @@ function ResizableColumns({ columns }) {
         <Fragment key={col.id ?? i}>
           <div style={{ width: widths[i], minWidth: col.minWidth ?? 120, flexShrink: 0, overflow: 'hidden' }}>
             {col.header && (
-              <p className="text-[10px] uppercase tracking-widest text-slate-600 font-semibold mb-1.5">{col.header}</p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-slate-600 font-semibold mb-1.5">{col.header}</p>
             )}
             {col.content}
           </div>
@@ -415,7 +415,7 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
   )
 
   return (
-    <div className="bg-slate-950/60 border-t border-slate-700/40 px-4 py-2.5">
+    <div className="bg-gray-50 dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-700/40 px-4 py-2.5">
       <ResizableColumns columns={[
         ...(nonManagedFields.length > 0 ? [{
           id: 'fields', header: 'Fields', defaultWidth: 280,
@@ -430,9 +430,9 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
           content: accessFields.map(renderField),
         }] : []),
       ]} />
-      <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-800/70 -mx-4 px-4">
+      <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-gray-100 dark:border-slate-800/70 -mx-4 px-4">
         {(onActivate || onDeactivate) && (
-          <div className="inline-flex rounded-lg border border-slate-700 overflow-hidden">
+          <div className="inline-flex rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
             {onActivate && (
               <button
                 onClick={onActivate}
@@ -444,7 +444,7 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
                 {activateLabel ?? 'Activate'}
               </button>
             )}
-            {onActivate && onDeactivate && <span className="w-px bg-slate-700" />}
+            {onActivate && onDeactivate && <span className="w-px bg-gray-200 dark:bg-slate-700" />}
             {onDeactivate && (
               <button
                 onClick={onDeactivate}
@@ -461,7 +461,7 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
         {onEdit && (
           <button
             onClick={onEdit}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-slate-600 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -507,11 +507,11 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
   const relationMeta = item._relationMetadata ?? null
   const relationStatus = relationMeta ? computeRowStatus(relationMeta) : null
   const RELATION_CHIP_COLORS = {
-    active:  'bg-emerald-900/40 border-emerald-700/50 text-emerald-300',
-    pending: 'bg-amber-900/40 border-amber-700/50 text-amber-300',
-    expired: 'bg-rose-900/40 border-rose-700/50 text-rose-300',
+    active:  'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-300',
+    pending: 'bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-700/50 text-amber-700 dark:text-amber-300',
+    expired: 'bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-700/50 text-rose-700 dark:text-rose-300',
   }
-  const relationChipClass = (relationStatus && RELATION_CHIP_COLORS[relationStatus]) ?? 'bg-slate-800 border-slate-700 text-slate-400'
+  const relationChipClass = (relationStatus && RELATION_CHIP_COLORS[relationStatus]) ?? 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400'
 
   const handleToggleFullRelation = async () => {
     if (fullRelationExpanded) {
@@ -604,18 +604,18 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
   }
 
   return (
-    <div className="rounded border border-slate-800 hover:border-slate-600 transition-colors">
+    <div className="rounded border border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
       <div
-        className="group flex items-center gap-2 pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors min-w-0"
+        className="group flex items-center gap-2 pl-3 pr-2 py-1.5 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors min-w-0"
         style={borderColor ? { boxShadow: `inset 3px 0 0 ${borderColor}` } : undefined}
       >
         {/* short ID + copy */}
         {id && (
           <div className="flex items-center gap-1 flex-shrink-0">
-            <span className="font-mono text-[10px] text-slate-500" title={id}>{shortId}</span>
+            <span className="font-mono text-[10px] text-gray-400 dark:text-slate-500" title={id}>{shortId}</span>
             <button
               onClick={(e) => { e.stopPropagation(); onCopyId(id) }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-slate-500 hover:text-slate-300"
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
               title="Copy ID"
               aria-label="Copy ID"
             >
@@ -629,7 +629,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
         )}
         {/* kind badge */}
         {item._kind && (
-          <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-violet-900/40 border border-violet-700/50 text-violet-300 text-[10px]">{item._kind}</span>
+          <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-900/40 border border-violet-200 dark:border-violet-700/50 text-violet-600 dark:text-violet-300 text-[10px]">{item._kind}</span>
         )}
         {/* relation kind badge — colored by relation validity */}
         {relationMeta?._kind && (
@@ -638,7 +638,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
         {/* name + visibility grouped, left-aligned */}
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {item._name && (
-            <span className="text-slate-200 text-xs font-medium truncate min-w-0" title={item._name}>{item._name}</span>
+            <span className="text-gray-800 dark:text-slate-200 text-xs font-medium truncate min-w-0" title={item._name}>{item._name}</span>
           )}
           {visibilityLabel && (
             <span className={`flex-shrink-0 text-[10px] font-medium ${visibilityColor}`}>{visibilityLabel}</span>
@@ -646,16 +646,16 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
         </div>
         {/* unmanaged fields inline as key: value pairs */}
         {unmanagedFields.map(([k, v]) => (
-          <span key={k} className="flex-shrink-0 text-[10px] text-slate-500 hidden sm:inline">
-            <span className="text-slate-600">{k}:</span>{' '}
-            <span className="text-slate-300 font-mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+          <span key={k} className="flex-shrink-0 text-[10px] text-gray-400 dark:text-slate-500 hidden sm:inline">
+            <span className="text-gray-300 dark:text-slate-600">{k}:</span>{' '}
+            <span className="text-gray-700 dark:text-slate-300 font-mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
           </span>
         ))}
         {/* expand button */}
         {!forceExpanded && (
           <button
             onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded) }}
-            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-slate-500 hover:text-blue-300 hover:bg-slate-700"
+            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-gray-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-300 hover:bg-gray-100 dark:hover:bg-slate-700"
             title={isCardExpanded ? "Collapse fields" : "Expand all fields"}
             aria-label={isCardExpanded ? "Collapse fields" : "Expand all fields"}
           >
@@ -668,7 +668,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
         {onEdit && (
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(item) }}
-            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-slate-500 hover:text-sky-300 hover:bg-slate-700"
+            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-gray-400 dark:text-slate-500 hover:text-sky-500 dark:hover:text-sky-300 hover:bg-gray-100 dark:hover:bg-slate-700"
             title="View / Edit record"
             aria-label="View / Edit record"
           >
@@ -700,7 +700,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
           />
         )
         return (
-        <div className="border-t border-slate-800 bg-slate-950/40">
+        <div className="border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950/40">
           {/* Relation metadata section */}
           {relationMeta && (
             <div className="px-3 pt-2.5 pb-1.5">
@@ -723,7 +723,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
                 <button
                   onClick={handleToggleFullRelation}
                   disabled={fullRelationLoading}
-                  className="mt-1.5 inline-flex items-center gap-1 px-1 py-0.5 text-[10px] text-slate-500 hover:text-slate-300 transition-colors disabled:opacity-50"
+                  className="mt-1.5 inline-flex items-center gap-1 px-1 py-0.5 text-[10px] text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors disabled:opacity-50"
                 >
                   {fullRelationLoading ? (
                     <svg className="animate-spin w-2.5 h-2.5" fill="none" viewBox="0 0 24 24">
@@ -742,11 +742,11 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
           )}
           {/* Divider between relation and record fields */}
           {relationMeta && (
-            <hr className="border-slate-700/60 mx-3" />
+            <hr className="border-gray-200 dark:border-slate-700/60 mx-3" />
           )}
           {/* Record fields */}
           <div className="px-3 py-2">
-            {recordTypeLabel && <p className="text-[10px] uppercase tracking-widest text-slate-600 font-semibold mb-1.5">{recordTypeLabel}</p>}
+            {recordTypeLabel && <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-slate-600 font-semibold mb-1.5">{recordTypeLabel}</p>}
             <ResizableColumns columns={[
               ...(nonManagedFields.length > 0 ? [{
                 id: 'fields', header: 'Fields', defaultWidth: 280,
@@ -819,20 +819,20 @@ function ExpandedRowPanel({
   const showFilterBar = selectedTraversal && !selectedTraversal.synthetic
 
   return (
-    <div className="bg-slate-950/60 border-t border-slate-700/40">
+    <div className="bg-gray-50 dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-700/40">
       {/* Tab bar */}
-      <div className="flex items-stretch border-b border-slate-800">
+      <div className="flex items-stretch border-b border-gray-200 dark:border-slate-800">
         {/* Record name */}
         {title && (
           <div className="flex items-center gap-1.5 px-4 flex-shrink-0">
             {fullRecordLoading && (
-              <svg className="animate-spin w-3 h-3 text-slate-500" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-3 h-3 text-gray-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
             )}
-            <span className="text-xs font-semibold text-slate-300 truncate max-w-[180px]" title={title}>{title}</span>
-            <span className="text-slate-700 select-none">|</span>
+            <span className="text-xs font-semibold text-gray-700 dark:text-slate-300 truncate max-w-[180px]" title={title}>{title}</span>
+            <span className="text-gray-200 dark:text-slate-700 select-none">|</span>
           </div>
         )}
         {/* Tabs */}
@@ -842,7 +842,7 @@ function ExpandedRowPanel({
             className={`px-3 py-2 text-[11px] whitespace-nowrap border-b-2 transition-colors ${
               !selectedTraversal
                 ? 'border-blue-500 text-blue-300'
-                : 'border-transparent text-slate-500 hover:text-slate-200 hover:border-slate-600'
+                : 'border-transparent text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
             }`}
           >
             Record
@@ -854,7 +854,7 @@ function ExpandedRowPanel({
               className={`px-3 py-2 text-[11px] whitespace-nowrap border-b-2 transition-colors ${
                 selectedTraversal?.subResource === t.subResource
                   ? 'border-blue-500 text-blue-300'
-                  : 'border-transparent text-slate-500 hover:text-slate-200 hover:border-slate-600'
+                  : 'border-transparent text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
               }`}
             >
               {t.label}
@@ -865,19 +865,19 @@ function ExpandedRowPanel({
 
       {/* Filter bar – only for real (non-synthetic) traversals */}
       {showFilterBar && (
-        <div className="px-4 py-2 border-b border-slate-800/70 flex flex-wrap gap-x-4 gap-y-2 items-center">
+        <div className="px-4 py-2 border-b border-gray-200 dark:border-slate-800/70 flex flex-wrap gap-x-4 gap-y-2 items-center">
           {/* Status */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Status</span>
-            <div className="inline-flex rounded border border-slate-700 overflow-hidden">
+            <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide">Status</span>
+            <div className="inline-flex rounded border border-gray-200 dark:border-slate-700 overflow-hidden">
               {[null, 'actives', 'pendings', 'expireds'].map((val, i) => (
                 <button
                   key={i}
                   onClick={() => onTraversalStatusFilterChange(val)}
-                  className={`px-2 py-0.5 text-[10px] border-r border-slate-700 last:border-r-0 transition-colors ${
+                  className={`px-2 py-0.5 text-[10px] border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                     traversalStatusFilter === val
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                      : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   {val === null ? 'All' : val.charAt(0).toUpperCase() + val.slice(1, -1)}
@@ -888,16 +888,16 @@ function ExpandedRowPanel({
 
           {/* Visibility */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Visibility</span>
-            <div className="inline-flex rounded border border-slate-700 overflow-hidden">
+            <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide">Visibility</span>
+            <div className="inline-flex rounded border border-gray-200 dark:border-slate-700 overflow-hidden">
               {[null, 'publics', 'protecteds', 'privates'].map((val, i) => (
                 <button
                   key={i}
                   onClick={() => onTraversalVisibilityFilterChange(val)}
-                  className={`px-2 py-0.5 text-[10px] border-r border-slate-700 last:border-r-0 transition-colors ${
+                  className={`px-2 py-0.5 text-[10px] border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                     traversalVisibilityFilter === val
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                      : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   {val === null ? 'All' : val.charAt(0).toUpperCase() + val.slice(1, -1)}
@@ -909,11 +909,11 @@ function ExpandedRowPanel({
           {/* Sort field + direction */}
           {availableSortFields.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Sort</span>
+              <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide">Sort</span>
               <select
                 value={traversalSortField}
                 onChange={(e) => onTraversalSortFieldChange(e.target.value)}
-                className="bg-slate-800 border border-slate-700 text-slate-300 text-[10px] rounded px-1.5 py-0.5 focus:outline-none focus:border-blue-600"
+                className="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-[10px] rounded px-1.5 py-0.5 focus:outline-none focus:border-blue-600"
               >
                 <option value="">— none —</option>
                 {availableSortFields.map((f) => (
@@ -921,15 +921,15 @@ function ExpandedRowPanel({
                 ))}
               </select>
               {traversalSortField && (
-                <div className="inline-flex rounded border border-slate-700 overflow-hidden">
+                <div className="inline-flex rounded border border-gray-200 dark:border-slate-700 overflow-hidden">
                   {['ASC', 'DESC'].map((dir) => (
                     <button
                       key={dir}
                       onClick={() => onTraversalSortDirChange(dir)}
-                      className={`px-2 py-0.5 text-[10px] border-r border-slate-700 last:border-r-0 transition-colors ${
+                      className={`px-2 py-0.5 text-[10px] border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${
                         traversalSortDir === dir
                           ? 'bg-blue-600 text-white'
-                          : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                          : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       {dir}
@@ -943,7 +943,7 @@ function ExpandedRowPanel({
           {/* Visible fields */}
           {availableVisibleFields.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Fields</span>
+              <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide">Fields</span>
               <div className="flex flex-wrap gap-1">
                 {availableVisibleFields.map((f) => {
                   const active = traversalVisibleFields === null || traversalVisibleFields.has(f)
@@ -970,8 +970,8 @@ function ExpandedRowPanel({
                       }}
                       className={`px-1.5 py-0.5 text-[10px] rounded border transition-colors ${
                         active
-                          ? 'border-slate-600 bg-slate-700 text-slate-200'
-                          : 'border-slate-700 bg-slate-900 text-slate-500 hover:text-slate-300'
+                          ? 'border-blue-200 dark:border-slate-600 bg-blue-50 dark:bg-slate-700 text-blue-700 dark:text-slate-200'
+                          : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
                       }`}
                     >
                       {f}
@@ -1004,10 +1004,10 @@ function ExpandedRowPanel({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              <span className="text-xs text-slate-400">Loading {selectedTraversal.label}…</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">Loading {selectedTraversal.label}…</span>
             </div>
           ) : traversalData.length === 0 ? (
-            <div className="flex items-center justify-center py-8 text-slate-500 text-xs">
+            <div className="flex items-center justify-center py-8 text-gray-400 dark:text-slate-500 text-xs">
               No {selectedTraversal.label} found.
             </div>
           ) : (
@@ -1044,22 +1044,22 @@ function ExpandedRowPanel({
             </div>
           )}
           {!selectedTraversal?.synthetic && (
-          <div className="flex items-center gap-2 px-4 pt-2 pb-2.5 border-t border-slate-800/70">
+          <div className="flex items-center gap-2 px-4 pt-2 pb-2.5 border-t border-gray-100 dark:border-slate-800/70">
             <button
               onClick={onTraversalPrev}
               disabled={traversalPage === 0 || traversalLoading}
-              className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-1 text-xs rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
               onClick={onTraversalNext}
               disabled={!traversalHasNextPage || traversalLoading}
-              className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-1 text-xs rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Next
             </button>
-            <span className="text-[10px] text-slate-500 font-mono">page {traversalPage + 1}</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">page {traversalPage + 1}</span>
             <div className="ml-auto flex items-center gap-1.5">
               {onAddItem && (
                 <button
@@ -1078,7 +1078,7 @@ function ExpandedRowPanel({
                 <button
                   onClick={onUpdateAll}
                   disabled={traversalLoading}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   title={`Update all ${selectedTraversal?.label}`}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -1190,8 +1190,8 @@ function TappRefChip({ meta }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
         meta.isMixed
-          ? 'border-amber-700/60 bg-amber-900/30 text-amber-200'
-          : 'border-cyan-700/60 bg-cyan-900/30 text-cyan-200'
+          ? 'border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200'
+          : 'border-cyan-300 dark:border-cyan-700/60 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-200'
       }`}
       title={meta.title}
     >
@@ -1206,7 +1206,7 @@ function TappRefChip({ meta }) {
       )}
       <span>{meta.label}</span>
       {meta.count > 1 && (
-        <span className="inline-flex items-center justify-center min-w-4 h-4 rounded-full bg-slate-900/70 border border-slate-700 px-1 text-[9px] font-mono text-slate-200">
+        <span className="inline-flex items-center justify-center min-w-4 h-4 rounded-full bg-gray-100 dark:bg-slate-900/70 border border-gray-200 dark:border-slate-700 px-1 text-[9px] font-mono text-gray-700 dark:text-slate-200">
           {meta.count}
         </span>
       )}
@@ -1465,7 +1465,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-48 text-slate-400 text-sm">
+      <div className="flex items-center justify-center h-48 text-gray-400 dark:text-slate-400 text-sm">
         <svg className="animate-spin w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -1482,7 +1482,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="px-3 py-1.5 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+            className="px-3 py-1.5 text-xs rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 transition-colors"
           >
             Retry
           </button>
@@ -1493,8 +1493,8 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
 
   if (!data?.length) {
     return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-500 text-sm">
-        <svg className="w-8 h-8 text-slate-700" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+      <div className="flex flex-col items-center justify-center h-48 gap-2 text-gray-400 dark:text-slate-500 text-sm">
+        <svg className="w-8 h-8 text-gray-200 dark:text-slate-700" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
         No records found
@@ -1503,35 +1503,35 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
   }
 
   return (
-    <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border border-slate-800">
+    <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-800">
       {tooltip && (
         <div
-          className="fixed z-50 pointer-events-none bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 shadow-xl text-xs"
+          className="fixed z-50 pointer-events-none bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-xl text-xs"
           style={{ left: tooltip.x, top: tooltip.y }}
         >
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 w-16">Valid from</span>
-              <span className="text-slate-200 font-mono">{fmt(tooltip.row._validFromDateTime)}</span>
+              <span className="text-gray-500 dark:text-slate-400 w-16">Valid from</span>
+              <span className="text-gray-800 dark:text-slate-200 font-mono">{fmt(tooltip.row._validFromDateTime)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 w-16">Valid until</span>
-              <span className="text-slate-200 font-mono">{fmt(tooltip.row._validUntilDateTime)}</span>
+              <span className="text-gray-500 dark:text-slate-400 w-16">Valid until</span>
+              <span className="text-gray-800 dark:text-slate-200 font-mono">{fmt(tooltip.row._validUntilDateTime)}</span>
             </div>
           </div>
         </div>
       )}
       {colTooltip && (
         <div
-          className="fixed z-50 pointer-events-none bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 shadow-xl"
+          className="fixed z-50 pointer-events-none bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 shadow-xl"
           style={{ left: colTooltip.x, top: colTooltip.y }}
         >
-          <span className="font-mono text-xs text-slate-300">{colTooltip.key}</span>
+          <span className="font-mono text-xs text-gray-700 dark:text-slate-300">{colTooltip.key}</span>
         </div>
       )}
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-slate-800/60 border-b border-slate-700">
+          <tr className="bg-gray-50 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700">
             {orderedColumns.map((col) => {
               const sortEntry = sortOrder?.find((s) => s.field === col.key)
               const isSorted = !!sortEntry
@@ -1542,7 +1542,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                 onDragEnter={(e) => handleColDragEnter(e, col.key)}
                 onDragOver={handleColDragOver}
                 onDrop={(e) => handleColDrop(e, col.key)}
-                className={`group relative text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap select-none transition-colors hover:bg-slate-700/50 ${isSorted ? 'text-blue-400' : 'text-slate-400'}${isDropTarget ? ' border-l-2 border-l-blue-500' : ''}`}
+                className={`group relative text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap select-none transition-colors hover:bg-gray-100 dark:hover:bg-slate-700/50 ${isSorted ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-slate-400'}${isDropTarget ? ' border-l-2 border-l-blue-500' : ''}`}
                 onMouseEnter={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect()
                   setColTooltip({ key: col.key, x: rect.left, y: rect.bottom + 4 })
@@ -1557,7 +1557,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                       onDragStart={(e) => handleColDragStart(e, col.key)}
                       onDragEnd={handleColDragEnd}
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center justify-center w-3.5 h-3.5 rounded text-slate-500 hover:text-slate-300 cursor-grab active:cursor-grabbing"
+                      className="inline-flex items-center justify-center w-3.5 h-3.5 rounded text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
                       title="Drag to reorder column"
                       aria-label={`Drag ${col.label} column`}
                     >
@@ -1588,7 +1588,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                       e.stopPropagation()
                       setOpenColumnMenuKey((prev) => (prev === col.key ? null : col.key))
                     }}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-4 h-4 rounded transition-all ${openColumnMenuKey === col.key ? 'opacity-100 bg-slate-600 text-slate-200' : 'opacity-0 group-hover:opacity-100 text-slate-500 hover:text-slate-200 hover:bg-slate-700'}`}
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-4 h-4 rounded transition-all ${openColumnMenuKey === col.key ? 'opacity-100 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-200' : 'opacity-0 group-hover:opacity-100 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
                     title="Column actions"
                     aria-label={`Open actions for ${col.label}`}
                   >
@@ -1600,7 +1600,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                 {openColumnMenuKey === col.key && (onSetSortColumn || onColumnApplyFilter || onColumnDeselectField || onColumnHideField) && (
                   <div
                     ref={columnMenuRef}
-                    className={`absolute top-full mt-1 z-[120] min-w-[190px] rounded-lg border border-slate-700 bg-slate-900 shadow-xl overflow-hidden ${col.key === orderedColumns[0]?.key ? 'left-0' : 'right-0'}`}
+                    className={`absolute top-full mt-1 z-[120] min-w-[190px] rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl overflow-hidden ${col.key === orderedColumns[0]?.key ? 'left-0' : 'right-0'}`}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {onSetSortColumn && (
@@ -1612,7 +1612,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                             onSetSortColumn(col.key, 'ASC')
                             setOpenColumnMenuKey(null)
                           }}
-                          className="block w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                          className="block w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
                           Sort ascending
                         </button>
@@ -1623,7 +1623,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                             onSetSortColumn(col.key, 'DESC')
                             setOpenColumnMenuKey(null)
                           }}
-                          className="block w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                          className="block w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
                           Sort descending
                         </button>
@@ -1635,14 +1635,14 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                               onSetSortColumn(col.key, null)
                               setOpenColumnMenuKey(null)
                             }}
-                            className="block w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                            className="block w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                           >
                             Clear sort
                           </button>
                         )}
                       </>
                     )}
-                    {onSetSortColumn && (onColumnApplyFilter || onColumnDeselectField || onColumnHideField) && <div className="h-px bg-slate-700/80" />}
+                    {onSetSortColumn && (onColumnApplyFilter || onColumnDeselectField || onColumnHideField) && <div className="h-px bg-gray-100 dark:bg-slate-700/80" />}
                     {onColumnApplyFilter && (
                       <button
                         type="button"
@@ -1651,12 +1651,12 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                           onColumnApplyFilter(col.key)
                           setOpenColumnMenuKey(null)
                         }}
-                        className="block w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="block w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
                         Apply Filter
                       </button>
                     )}
-                    {onColumnApplyFilter && (onColumnDeselectField || onColumnHideField) && <div className="h-px bg-slate-700/80" />}
+                    {onColumnApplyFilter && (onColumnDeselectField || onColumnHideField) && <div className="h-px bg-gray-100 dark:bg-slate-700/80" />}
                     {onColumnDeselectField && (
                       <button
                         type="button"
@@ -1665,12 +1665,12 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                           onColumnDeselectField(col.key)
                           setOpenColumnMenuKey(null)
                         }}
-                        className="block w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="block w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
                         Deselect field
                       </button>
                     )}
-                    {onColumnDeselectField && onColumnHideField && <div className="h-px bg-slate-700/80" />}
+                    {onColumnDeselectField && onColumnHideField && <div className="h-px bg-gray-100 dark:bg-slate-700/80" />}
                     {onColumnHideField && (
                       <button
                         type="button"
@@ -1679,7 +1679,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                           onColumnHideField(col.key)
                           setOpenColumnMenuKey(null)
                         }}
-                        className="block w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="block w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
                         Hide field
                       </button>
@@ -1696,8 +1696,8 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                       }}
                       className={`inline-flex items-center justify-center w-4 h-4 rounded border transition-all ${
                         selectedVisibleCount > 0
-                          ? 'opacity-100 border-slate-500 bg-slate-700 text-slate-200'
-                          : 'opacity-0 group-hover:opacity-100 border-slate-600 bg-slate-900 text-slate-500 hover:text-slate-300 hover:border-slate-500'
+                          ? 'opacity-100 border-gray-400 dark:border-slate-500 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
+                          : 'opacity-0 group-hover:opacity-100 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500'
                       }`}
                       title={allVisibleSelected ? 'Clear visible selection' : 'Select visible rows'}
                       aria-label={allVisibleSelected ? 'Clear visible selection' : 'Select visible rows'}
@@ -1716,7 +1716,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
             })}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800">
+        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
           {data.map((row, i) => {
             const status = hasValidityDates ? computeRowStatus(row) : null
             const rowId = row._id ?? i
@@ -1726,13 +1726,13 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
             return (
             <Fragment key={rowId}>
             <tr
-              className={`group transition-colors hover:bg-slate-800/40 cursor-pointer${status === 'expired' ? ' opacity-60' : ''}`}
+              className={`group transition-colors hover:bg-gray-50 dark:hover:bg-slate-800/40 cursor-pointer${status === 'expired' ? ' opacity-60' : ''}`}
               onClick={() => setExpandedRowId(isExpanded ? null : rowId)}
             >
               {orderedColumns.map((col, colIdx) => (
                 <td
                   key={col.key}
-                  className="px-4 py-3 text-slate-300 whitespace-nowrap max-w-[220px] truncate relative"
+                  className="px-4 py-3 text-gray-700 dark:text-slate-300 whitespace-nowrap max-w-[220px] truncate relative"
                   style={colIdx === 0 && status ? {
                     boxShadow: `inset 4px 0 0 ${STATUS_SHADOW_COLOR[status]}`,
                     transition: 'box-shadow 150ms ease',
@@ -1756,8 +1756,8 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                       }}
                       className={`absolute left-2.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-4 h-4 rounded border transition-all duration-150 ${
                         isSelected
-                          ? 'opacity-100 translate-x-0 border-slate-500 bg-slate-700 text-slate-200'
-                          : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 border-slate-600 bg-slate-900 text-slate-500 hover:text-slate-300 hover:border-slate-500'
+                          ? 'opacity-100 translate-x-0 border-gray-400 dark:border-slate-500 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
+                          : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500'
                       }`}
                       title={isSelected ? 'Deselect row' : 'Select row'}
                       aria-label={isSelected ? 'Deselect row' : 'Select row'}
@@ -1781,13 +1781,13 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                       : col.key === '_id' && typeof row[col.key] === 'string'
                       ? (
                         <div className="flex items-center gap-1.5" title={row[col.key]}>
-                          <span className="font-mono text-xs text-slate-300">{shortId(row[col.key])}</span>
+                          <span className="font-mono text-xs text-gray-700 dark:text-slate-300">{shortId(row[col.key])}</span>
                           <button
                             onClick={(e) => copyId(e, row[col.key])}
                             className={`px-1.5 py-0.5 rounded border text-[10px] leading-none ${
                               copiedId === row[col.key]
-                                ? 'border-emerald-600 bg-emerald-900/40 text-emerald-300'
-                                : 'border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500'
+                                ? 'border-emerald-500 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300'
+                                : 'border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-500'
                             }`}
                             title={copiedId === row[col.key] ? 'Copied' : 'Copy full ID'}
                             aria-label="Copy ID"
@@ -1834,7 +1834,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
             </tr>
             {isExpanded && (
               <tr>
-                <td colSpan={columns.length} className="p-0 border-b border-slate-700">
+                <td colSpan={columns.length} className="p-0 border-b border-gray-200 dark:border-slate-700">
                   <div style={{ position: 'sticky', left: 0, width: 'var(--cw, 100%)' }}>
                     <ExpandedRowPanel
                       row={row}
@@ -1976,24 +1976,24 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
       {traversalActionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setTraversalActionModal(null); setTraversalActionError(null) }} />
-          <div className="relative z-10 w-full max-w-md mx-4 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+          <div className="relative z-10 w-full max-w-md mx-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl">
             <div className="p-5 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-100">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                 {traversalActionModal.type === 'post' ? `Add to ${selectedTraversal?.label}` : `Update all ${selectedTraversal?.label}`}
               </h3>
               <textarea
                 rows={10}
                 value={traversalActionModal.body}
                 onChange={(e) => setTraversalActionModal((m) => ({ ...m, body: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 resize-y focus:outline-none focus:border-blue-600"
+                className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-gray-900 dark:text-slate-200 resize-y focus:outline-none focus:border-blue-600"
                 spellCheck={false}
                 autoFocus
               />
-              {traversalActionError && <p className="text-xs text-rose-400">{traversalActionError}</p>}
+              {traversalActionError && <p className="text-xs text-rose-500 dark:text-rose-400">{traversalActionError}</p>}
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => { setTraversalActionModal(null); setTraversalActionError(null) }}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                  className="px-3 py-1.5 text-xs rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancel
                 </button>
@@ -2039,12 +2039,12 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setRelatedRecordModal(null)}
           />
-          <div className="relative z-10 w-full max-w-2xl mx-4 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900 flex-shrink-0">
+          <div className="relative z-10 w-full max-w-2xl mx-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
               <div>
                 {relatedRecordModal.record && (
                   <>
-                    <h3 className="text-sm font-semibold text-slate-100">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                       {relatedRecordModal.record._name ?? relatedRecordModal.record._kind ?? 'Record'}
                     </h3>
                     {relatedRecordModal.record._kind && relatedRecordModal.record._name && (
@@ -2053,15 +2053,15 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                   </>
                 )}
                 {!relatedRecordModal.record && !relatedRecordModal.loading && (
-                  <h3 className="text-sm font-semibold text-slate-100">Related Record</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Related Record</h3>
                 )}
                 {relatedRecordModal.loading && (
-                  <h3 className="text-sm font-semibold text-slate-400">Loading…</h3>
+                  <h3 className="text-sm font-semibold text-gray-400 dark:text-slate-400">Loading…</h3>
                 )}
               </div>
               <button
                 onClick={() => setRelatedRecordModal(null)}
-                className="p-1 rounded text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+                className="p-1 rounded text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                 aria-label="Close"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -2076,11 +2076,11 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  <span className="text-slate-400 text-sm">Fetching record…</span>
+                  <span className="text-gray-400 dark:text-slate-400 text-sm">Fetching record…</span>
                 </div>
               )}
               {relatedRecordModal.error && (
-                <div className="p-4 text-rose-400 text-sm">{relatedRecordModal.error}</div>
+                <div className="p-4 text-rose-500 dark:text-rose-400 text-sm">{relatedRecordModal.error}</div>
               )}
               {relatedRecordModal.record && (
                 <ManagedFieldsPanel row={relatedRecordModal.record} />

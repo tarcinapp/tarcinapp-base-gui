@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useApp } from '../../context/AppContext'
 
-const LOCAL_ENDPOINT = 'http://localhost:8081'
+const LOCAL_ENDPOINT = 'http://127.0.0.1:8081'
 
 function decodeBase64Url(value) {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
@@ -183,7 +183,7 @@ export default function SetupScreen() {
   const isLoading = submitting || oasStatus === 'loading'
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="flex items-center gap-3 mb-8 justify-center">
@@ -193,31 +193,31 @@ export default function SetupScreen() {
             </svg>
           </div>
           <div>
-            <p className="text-white font-bold text-lg leading-none">Tarcinapp</p>
-            <p className="text-slate-400 text-sm mt-0.5">Entity Platform GUI</p>
+            <p className="text-gray-900 dark:text-white font-bold text-lg leading-none">Tarcinapp</p>
+            <p className="text-gray-500 dark:text-slate-400 text-sm mt-0.5">Entity Platform GUI</p>
           </div>
         </div>
 
-        <div className="bg-slate-900 rounded-2xl border border-slate-800 p-8">
-          <h1 className="text-white font-semibold text-xl mb-1">Connect to Backend</h1>
-          <p className="text-slate-400 text-sm mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-8">
+          <h1 className="text-gray-900 dark:text-white font-semibold text-xl mb-1">Connect to Backend</h1>
+          <p className="text-gray-500 dark:text-slate-400 text-sm mb-6">
             Select an endpoint source or upload an OpenAPI JSON file. The UI will be generated automatically from the spec.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                API Endpoint <span className="text-red-400">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
+                API Endpoint <span className="text-red-500 dark:text-red-400">*</span>
               </label>
 
-              <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-slate-800 border border-slate-700 p-1">
+              <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-1">
                 <button
                   type="button"
                   onClick={() => setEndpointMode('local')}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     endpointMode === 'local'
                       ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-700/80'
+                      : 'text-gray-600 dark:text-slate-300 hover:bg-gray-200/80 dark:hover:bg-slate-700/80'
                   }`}
                 >
                   Local
@@ -228,7 +228,7 @@ export default function SetupScreen() {
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     endpointMode === 'custom'
                       ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-700/80'
+                      : 'text-gray-600 dark:text-slate-300 hover:bg-gray-200/80 dark:hover:bg-slate-700/80'
                   }`}
                 >
                   Custom
@@ -239,7 +239,7 @@ export default function SetupScreen() {
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     endpointMode === 'file'
                       ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-700/80'
+                      : 'text-gray-600 dark:text-slate-300 hover:bg-gray-200/80 dark:hover:bg-slate-700/80'
                   }`}
                 >
                   File
@@ -253,7 +253,7 @@ export default function SetupScreen() {
                   onChange={(e) => setCustomEndpoint(e.target.value)}
                   required
                   placeholder={LOCAL_ENDPOINT}
-                  className="mt-3 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="mt-3 w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-gray-900 dark:text-slate-100 text-sm placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                 />
               )}
 
@@ -264,18 +264,18 @@ export default function SetupScreen() {
                   onDragLeave={handleDragLeave}
                   className={`mt-3 rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
                     isDragging
-                      ? 'border-blue-500 bg-blue-950/20'
-                      : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                      : 'border-gray-300 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/30 hover:border-gray-400 dark:hover:border-slate-600'
                   }`}
                 >
-                  <p className="text-sm text-slate-300">
+                  <p className="text-sm text-gray-600 dark:text-slate-300">
                     Drag and drop OpenAPI JSON file here
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">or</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">or</p>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="mt-2 px-3 py-1.5 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
+                    className="mt-2 px-3 py-1.5 text-xs rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 transition-colors"
                   >
                     Choose JSON File
                   </button>
@@ -289,35 +289,35 @@ export default function SetupScreen() {
                 </div>
               )}
 
-              <p className="mt-1.5 text-xs text-slate-500">
+              <p className="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
                 Will fetch{' '}
-                <code className="bg-slate-800 px-1 py-0.5 rounded font-mono">
+                <code className="bg-gray-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">
                   {(endpoint || 'http://...').replace(/\/$/, '')}/openapi.json
                 </code>
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
                 Bearer Token{' '}
-                <span className="text-slate-500 text-xs font-normal">(optional)</span>
+                <span className="text-gray-400 dark:text-slate-500 text-xs font-normal">(optional)</span>
               </label>
               <input
                 type="password"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="eyJhbGciOiJSUzI1NiJ9…"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-gray-900 dark:text-slate-100 text-sm placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
               />
 
               {token.trim() && tokenValidation.isValid && (
-                <div className="mt-2.5 rounded-lg border border-emerald-800 bg-emerald-950/40 p-3">
-                  <p className="text-xs text-emerald-300">
-                    User: <span className="font-medium text-emerald-200">{tokenValidation.username}</span>
+                <div className="mt-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-3">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                    User: <span className="font-medium text-emerald-800 dark:text-emerald-200">{tokenValidation.username}</span>
                   </p>
-                  <p className="text-xs text-emerald-300 mt-1">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">
                     Roles:{' '}
-                    <span className="font-medium text-emerald-200">
+                    <span className="font-medium text-emerald-800 dark:text-emerald-200">
                       {tokenValidation.roles.length ? tokenValidation.roles.join(', ') : 'No roles found'}
                     </span>
                   </p>
@@ -325,18 +325,18 @@ export default function SetupScreen() {
               )}
 
               {token.trim() && !tokenValidation.isValid && (
-                <p className="mt-2 text-xs text-red-400">
+                <p className="mt-2 text-xs text-red-500 dark:text-red-400">
                   Invalid token: {tokenValidation.error}
                 </p>
               )}
             </div>
 
             {oasError && (
-              <div className="flex items-start gap-2.5 bg-red-950/50 border border-red-800 rounded-lg p-3">
-                <svg className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <svg className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <p className="text-red-300 text-sm">{oasError}</p>
+                <p className="text-red-600 dark:text-red-300 text-sm">{oasError}</p>
               </div>
             )}
 
@@ -360,7 +360,7 @@ export default function SetupScreen() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-slate-600 mt-6">
+        <p className="text-center text-xs text-gray-400 dark:text-slate-600 mt-6">
           You can also set{' '}
           <code className="font-mono">TAPP_API_ENDPOINT</code> and{' '}
           <code className="font-mono">TAPP_API_TOKEN</code> environment variables to skip this screen.

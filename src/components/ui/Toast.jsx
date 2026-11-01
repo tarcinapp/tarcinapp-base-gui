@@ -2,9 +2,9 @@ export default function Toast({ message, onClose, type = 'error' }) {
   if (!message) return null
 
   const stylesByType = {
-    error: 'bg-rose-950/95 border-rose-700 text-rose-100',
-    success: 'bg-emerald-950/95 border-emerald-700 text-emerald-100',
-    info: 'bg-slate-900/95 border-slate-600 text-slate-100',
+    error: 'bg-rose-50 dark:bg-rose-950/95 border-rose-200 dark:border-rose-700 text-rose-700 dark:text-rose-100',
+    success: 'bg-emerald-50 dark:bg-emerald-950/95 border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-100',
+    info: 'bg-white dark:bg-slate-900/95 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-100',
   }
 
   return (

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
+import { ThemeProvider } from './context/ThemeContext'
 import AppLayout from './components/layout/AppLayout'
 import SetupScreen from './components/setup/SetupScreen'
 import DashboardPage from './pages/DashboardPage'
@@ -30,11 +31,13 @@ function AppShell() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </AppProvider>
+    </ThemeProvider>
   )
 }
 

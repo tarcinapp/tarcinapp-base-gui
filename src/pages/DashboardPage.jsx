@@ -209,14 +209,14 @@ function ResourceCard({ label, routePath, collectionPath, hasSet, get, theme, sh
     >
       {/* Header with title */}
       <div className="flex items-start justify-between mb-3">
-        <h3 className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
+        <h3 className="text-sm font-medium text-gray-600 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
           {label}
         </h3>
       </div>
       
       {/* Main count - TOTAL of all items */}
       {loading ? (
-        <div className="h-9 w-16 bg-slate-800/50 rounded animate-pulse mb-4" />
+        <div className="h-9 w-16 bg-gray-200 dark:bg-slate-800/50 rounded animate-pulse mb-4" />
       ) : (
         <div className="text-3xl font-bold tabular-nums mb-4" style={{ color: theme.accent }}>
           {data?.total ?? '—'}
@@ -228,32 +228,32 @@ function ResourceCard({ label, routePath, collectionPath, hasSet, get, theme, sh
         <div className="space-y-2">
           {loading ? (
             <>
-              <div className="h-5 w-full bg-slate-800/30 rounded animate-pulse" />
-              <div className="h-5 w-full bg-slate-800/30 rounded animate-pulse" />
-              <div className="h-5 w-full bg-slate-800/30 rounded animate-pulse" />
-            </>
+                <div className="h-5 w-full bg-gray-200/50 dark:bg-slate-800/30 rounded animate-pulse" />
+                <div className="h-5 w-full bg-gray-200/50 dark:bg-slate-800/30 rounded animate-pulse" />
+                <div className="h-5 w-full bg-gray-200/50 dark:bg-slate-800/30 rounded animate-pulse" />
+              </>
           ) : baseType === 'relation' ? (
             // Relations: only validity periods (no visibility)
             <div className="flex items-center gap-2 text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="text-emerald-400">{data?.validity?.active ?? 0}</span>
-                <span className="text-slate-600">active</span>
+                <span className="text-emerald-600 dark:text-emerald-400">{data?.validity?.active ?? 0}</span>
+                <span className="text-gray-400 dark:text-slate-600">active</span>
               </div>
               {(data?.validity?.pending ?? 0) > 0 && (
                 <>
-                  <span className="text-slate-700">·</span>
+                  <span className="text-gray-300 dark:text-slate-700">·</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-amber-400">{data.validity.pending}</span>
-                    <span className="text-slate-600">pending</span>
+                    <span className="text-amber-500 dark:text-amber-400">{data.validity.pending}</span>
+                    <span className="text-gray-400 dark:text-slate-600">pending</span>
                   </div>
                 </>
               )}
               {(data?.validity?.expired ?? 0) > 0 && (
                 <>
-                  <span className="text-slate-700">·</span>
+                  <span className="text-gray-300 dark:text-slate-700">·</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-500">{data.validity.expired}</span>
-                    <span className="text-slate-600">expired</span>
+                    <span className="text-gray-400 dark:text-slate-500">{data.validity.expired}</span>
+                    <span className="text-gray-400 dark:text-slate-600">expired</span>
                   </div>
                 </>
               )}
@@ -263,26 +263,26 @@ function ResourceCard({ label, routePath, collectionPath, hasSet, get, theme, sh
             <>
               {/* Public */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-500 w-16">Public:</span>
+                <span className="text-gray-400 dark:text-slate-500 w-16">Public:</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">{data?.public?.active ?? 0}</span>
-                  <span className="text-slate-600">active</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">{data?.public?.active ?? 0}</span>
+                  <span className="text-gray-400 dark:text-slate-600">active</span>
                 </div>
                 {(data?.public?.pending ?? 0) > 0 && (
                   <>
-                    <span className="text-slate-700">·</span>
+                    <span className="text-gray-300 dark:text-slate-700">·</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-amber-400">{data.public.pending}</span>
-                      <span className="text-slate-600">pending</span>
+                      <span className="text-amber-500 dark:text-amber-400">{data.public.pending}</span>
+                      <span className="text-gray-400 dark:text-slate-600">pending</span>
                     </div>
                   </>
                 )}
                 {(data?.public?.expired ?? 0) > 0 && (
                   <>
-                    <span className="text-slate-700">·</span>
+                    <span className="text-gray-300 dark:text-slate-700">·</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500">{data.public.expired}</span>
-                      <span className="text-slate-600">expired</span>
+                      <span className="text-gray-400 dark:text-slate-500">{data.public.expired}</span>
+                      <span className="text-gray-400 dark:text-slate-600">expired</span>
                     </div>
                   </>
                 )}
@@ -290,26 +290,26 @@ function ResourceCard({ label, routePath, collectionPath, hasSet, get, theme, sh
 
               {/* Protected */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-500 w-16">Protected:</span>
+                <span className="text-gray-400 dark:text-slate-500 w-16">Protected:</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-blue-400">{data?.protected?.active ?? 0}</span>
-                  <span className="text-slate-600">active</span>
+                  <span className="text-blue-500 dark:text-blue-400">{data?.protected?.active ?? 0}</span>
+                  <span className="text-gray-400 dark:text-slate-600">active</span>
                 </div>
                 {(data?.protected?.pending ?? 0) > 0 && (
                   <>
-                    <span className="text-slate-700">·</span>
+                    <span className="text-gray-300 dark:text-slate-700">·</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-amber-400">{data.protected.pending}</span>
-                      <span className="text-slate-600">pending</span>
+                      <span className="text-amber-500 dark:text-amber-400">{data.protected.pending}</span>
+                      <span className="text-gray-400 dark:text-slate-600">pending</span>
                     </div>
                   </>
                 )}
                 {(data?.protected?.expired ?? 0) > 0 && (
                   <>
-                    <span className="text-slate-700">·</span>
+                    <span className="text-gray-300 dark:text-slate-700">·</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500">{data.protected.expired}</span>
-                      <span className="text-slate-600">expired</span>
+                      <span className="text-gray-400 dark:text-slate-500">{data.protected.expired}</span>
+                      <span className="text-gray-400 dark:text-slate-600">expired</span>
                     </div>
                   </>
                 )}
@@ -317,26 +317,26 @@ function ResourceCard({ label, routePath, collectionPath, hasSet, get, theme, sh
 
               {/* Private */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-500 w-16">Private:</span>
+                <span className="text-gray-400 dark:text-slate-500 w-16">Private:</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-purple-400">{data?.private?.active ?? 0}</span>
-                  <span className="text-slate-600">active</span>
+                  <span className="text-purple-500 dark:text-purple-400">{data?.private?.active ?? 0}</span>
+                  <span className="text-gray-400 dark:text-slate-600">active</span>
                 </div>
                 {(data?.private?.pending ?? 0) > 0 && (
                   <>
-                    <span className="text-slate-700">·</span>
+                    <span className="text-gray-300 dark:text-slate-700">·</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-amber-400">{data.private.pending}</span>
-                      <span className="text-slate-600">pending</span>
+                      <span className="text-amber-500 dark:text-amber-400">{data.private.pending}</span>
+                      <span className="text-gray-400 dark:text-slate-600">pending</span>
                     </div>
                   </>
                 )}
                 {(data?.private?.expired ?? 0) > 0 && (
                   <>
-                    <span className="text-slate-700">·</span>
+                    <span className="text-gray-300 dark:text-slate-700">·</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500">{data.private.expired}</span>
-                      <span className="text-slate-600">expired</span>
+                      <span className="text-gray-400 dark:text-slate-500">{data.private.expired}</span>
+                      <span className="text-gray-400 dark:text-slate-600">expired</span>
                     </div>
                   </>
                 )}
@@ -347,7 +347,7 @@ function ResourceCard({ label, routePath, collectionPath, hasSet, get, theme, sh
       )}
       
       {!hasSet && (
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total</p>
+        <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Total</p>
       )}
     </Link>
   )
@@ -404,7 +404,7 @@ export default function DashboardPage() {
   if (navItems.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-slate-500 text-sm">No resources found in the OpenAPI spec.</p>
+        <p className="text-gray-400 dark:text-slate-500 text-sm">No resources found in the OpenAPI spec.</p>
       </div>
     )
   }
@@ -413,11 +413,11 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Global controls: Show Details and Refresh buttons */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-200">Record Counts</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-slate-200">Record Counts</h1>
         <div className="flex items-center gap-3">
           <button
             onClick={toggleGlobalDetails}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
             title={globalShowDetails ? "Hide all details" : "Show all details"}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -431,7 +431,7 @@ export default function DashboardPage() {
           </button>
           <button
             onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
             title="Refresh data and clear cache"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -460,11 +460,11 @@ export default function DashboardPage() {
                   </svg>
                 </div>
               )}
-              <h2 className="text-lg font-semibold text-slate-200">{label}</h2>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-slate-200">{label}</h2>
               <div className="flex-1 h-px" style={{ background: `linear-gradient(to right, ${theme.border}, transparent)` }} />
               <button
                 onClick={() => toggleSectionDetails(type)}
-                className="p-1.5 rounded hover:bg-slate-800/50 text-slate-500 hover:text-slate-300 transition-colors duration-200"
+                className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-800/50 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 transition-colors duration-200"
                 title={showDetails ? "Hide section details" : "Show section details"}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -481,7 +481,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left: All Items */}
               <div>
-                <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-3 flex items-center gap-2">
                   <div className="w-1 h-3 rounded-full" style={{ background: theme.accent }} />
                   All
                 </h3>
@@ -504,7 +504,7 @@ export default function DashboardPage() {
               {/* Right: My Items */}
               {userId ? (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-3 flex items-center gap-2">
                     <div className="w-1 h-3 rounded-full bg-indigo-500" />
                     Mine
                   </h3>
@@ -524,12 +524,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center rounded-xl border border-slate-800 bg-slate-900/30 p-8">
+                <div className="flex items-center justify-center rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/30 p-8">
                   <div className="text-center">
-                    <svg className="w-12 h-12 mx-auto mb-3 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <p className="text-sm text-slate-500">Sign in to view your items</p>
+                    <p className="text-sm text-gray-400 dark:text-slate-500">Sign in to view your items</p>
                   </div>
                 </div>
               )}
