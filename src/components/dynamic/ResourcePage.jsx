@@ -332,23 +332,23 @@ function IdentityTab({ token }) {
     <div className="space-y-5">
       {/* Token status */}
       <div className="flex items-center gap-2">
-        <span className={`px-2 py-0.5 text-xs font-mono font-bold rounded ${isExpired ? 'bg-rose-800 text-rose-100' : 'bg-emerald-800 text-emerald-100'}`}>
+        <span className={`px-2 py-0.5 text-xs font-mono font-bold rounded ${isExpired ? 'bg-rose-100 dark:bg-rose-800 text-rose-700 dark:text-rose-100 border border-rose-300 dark:border-transparent' : 'bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-100 border border-emerald-300 dark:border-transparent'}`}>
           {isExpired ? 'Expired' : 'Valid'}
         </span>
         {exp !== null && (
-          <span className="text-[10px] text-slate-500 font-mono">{isExpired ? 'Expired' : 'Expires'} {fmtTime(exp)}</span>
+          <span className="text-[10px] text-gray-500 dark:text-slate-500 font-mono">{isExpired ? 'Expired' : 'Expires'} {fmtTime(exp)}</span>
         )}
       </div>
 
       {/* Roles */}
       {rolesArray !== null && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Roles</p>
+          <p className="text-[10px] font-bold text-gray-600 dark:text-slate-500 uppercase tracking-widest">Roles</p>
           <div className="flex flex-wrap gap-1.5">
             {rolesArray.length === 0
-              ? <span className="text-xs text-gray-400 dark:text-slate-600 italic">No roles</span>
+              ? <span className="text-xs text-gray-500 dark:text-slate-600 italic">No roles</span>
               : rolesArray.map((r) => (
-                  <span key={r} className="px-2 py-0.5 text-xs rounded-md bg-violet-600/20 text-violet-300 border border-violet-700 font-mono">{r}</span>
+                  <span key={r} className="px-2 py-0.5 text-xs rounded-md bg-violet-100 dark:bg-violet-600/20 text-violet-700 dark:text-violet-300 border border-violet-300 dark:border-violet-700 font-mono">{r}</span>
                 ))
             }
           </div>
@@ -358,14 +358,14 @@ function IdentityTab({ token }) {
       {/* Subject / Issuer / Audience / JTI */}
       {(claims.sub || claims.iss || claims.aud || claims.jti) && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Identity</p>
+          <p className="text-[10px] font-bold text-gray-600 dark:text-slate-500 uppercase tracking-widest">Identity</p>
           <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
             {[['sub', claims.sub], ['iss', claims.iss], ['aud', claims.aud], ['jti', claims.jti]]
               .filter(([, v]) => v != null)
               .map(([key, value]) => (
-                <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
-                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
-                  <div className="text-xs mt-0.5">{formatClaimValue(value)}</div>
+                <div key={key} className="px-3 py-1.5 bg-white dark:bg-slate-950">
+                  <p className="text-[10px] text-gray-500 dark:text-slate-500 font-mono">{key}</p>
+                  <div className="text-xs mt-0.5 text-gray-900 dark:text-slate-200">{formatClaimValue(value)}</div>
                 </div>
               ))}
           </div>
@@ -375,14 +375,14 @@ function IdentityTab({ token }) {
       {/* Timestamps */}
       {(iat !== null || exp !== null || claims.nbf != null) && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Timestamps</p>
+          <p className="text-[10px] font-bold text-gray-600 dark:text-slate-500 uppercase tracking-widest">Timestamps</p>
           <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
             {[['iat', iat], ['exp', exp], ['nbf', claims.nbf]]
               .filter(([, v]) => v != null)
               .map(([key, ts]) => (
-                <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
-                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
-                  <p className="text-xs text-gray-700 dark:text-slate-300 font-mono">{fmtTime(ts)}</p>
+                <div key={key} className="px-3 py-1.5 bg-white dark:bg-slate-950">
+                  <p className="text-[10px] text-gray-500 dark:text-slate-500 font-mono">{key}</p>
+                  <p className="text-xs text-gray-900 dark:text-slate-300 font-mono">{fmtTime(ts)}</p>
                 </div>
               ))}
           </div>
@@ -392,12 +392,12 @@ function IdentityTab({ token }) {
       {/* All other claims */}
       {genericClaims.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Claims</p>
+          <p className="text-[10px] font-bold text-gray-600 dark:text-slate-500 uppercase tracking-widest">Claims</p>
           <div className="rounded-lg border border-gray-200 dark:border-slate-800 divide-y divide-gray-200 dark:divide-slate-800 overflow-hidden">
             {genericClaims.map(([key, value]) => (
-              <div key={key} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-950">
-                <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{key}</p>
-                <div className="text-xs mt-0.5">{formatClaimValue(value)}</div>
+              <div key={key} className="px-3 py-1.5 bg-white dark:bg-slate-950">
+                <p className="text-[10px] text-gray-500 dark:text-slate-500 font-mono">{key}</p>
+                <div className="text-xs mt-0.5 text-gray-900 dark:text-slate-200">{formatClaimValue(value)}</div>
               </div>
             ))}
           </div>

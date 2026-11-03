@@ -133,12 +133,12 @@ function ManagedFieldValue({ fieldKey, value, type }) {
 
 function renderCompactValue(key, value, type) {
   if (value === null || value === undefined)
-    return <span className="text-gray-300 dark:text-slate-600 italic text-[11px]">—</span>
+    return <span className="text-gray-400 dark:text-slate-600 italic text-[11px]">—</span>
 
   if (type === 'array' || Array.isArray(value)) {
     const arr = Array.isArray(value) ? value : []
     if (arr.length === 0)
-      return <span className="text-gray-300 dark:text-slate-600 italic text-[11px]">empty</span>
+      return <span className="text-gray-400 dark:text-slate-600 italic text-[11px]">empty</span>
     const preview = arr.slice(0, 3).map(String).join(', ')
     return (
       <span className="text-sky-600 dark:text-sky-300 text-[11px] font-mono" title={arr.join(', ')}>
@@ -222,7 +222,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
           <TypeIcon type={detectedType} />
         </span>
         <span className="inline-flex items-center gap-1 flex-shrink-0 w-36">
-          <span className="text-gray-400 dark:text-slate-500 text-[11px] font-mono truncate" title={fieldKey}>
+          <span className="text-gray-600 dark:text-slate-500 text-[11px] font-mono truncate" title={fieldKey}>
             {fieldKey}
           </span>
           {isResolvable && (
@@ -281,7 +281,7 @@ function FieldRow({ fieldKey, meta, value, onResolve, onViewRecord }) {
               })}
             </span>
           ) : resolvedObjects && resolvedObjects.length === 0 ? (
-            <span className="text-gray-300 dark:text-slate-600 italic text-[11px]">no objects resolved</span>
+            <span className="text-gray-400 dark:text-slate-600 italic text-[11px]">no objects resolved</span>
           ) : isExpandableObj ? (
             <button
               type="button"
@@ -344,7 +344,7 @@ function ResizableColumns({ columns }) {
         <Fragment key={col.id ?? i}>
           <div style={{ width: widths[i], minWidth: col.minWidth ?? 120, flexShrink: 0, overflow: 'hidden' }}>
             {col.header && (
-              <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-slate-600 font-semibold mb-1.5">{col.header}</p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 dark:text-slate-500 font-semibold mb-1.5">{col.header}</p>
             )}
             {col.content}
           </div>
@@ -415,7 +415,7 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
   )
 
   return (
-    <div className="bg-gray-50 dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-700/40 px-4 py-2.5">
+    <div className="bg-white dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-700/40 px-4 py-2.5">
       <ResizableColumns columns={[
         ...(nonManagedFields.length > 0 ? [{
           id: 'fields', header: 'Fields', defaultWidth: 280,
@@ -434,10 +434,10 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
         {(onActivate || onDeactivate) && (
           <div className="inline-flex rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
             {onActivate && (
-              <button
-                onClick={onActivate}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-800/40 hover:bg-emerald-700/50 text-emerald-300 hover:text-emerald-100 transition-colors"
-              >
+                <button
+                  onClick={onActivate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-800/40 dark:hover:bg-emerald-700/50 text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100 transition-colors"
+                >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -448,7 +448,7 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
             {onDeactivate && (
               <button
                 onClick={onDeactivate}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-900/30 hover:bg-amber-800/50 text-amber-400 hover:text-amber-200 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 text-amber-700 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200 transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -472,7 +472,7 @@ function ManagedFieldsPanel({ row, onEdit, onActivate, activateLabel, onDeactiva
         {onDelete && (
           <button
             onClick={onDelete}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-900/30 hover:bg-rose-800/50 text-rose-400 hover:text-rose-200 border border-rose-800/50 hover:border-rose-700 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-800/50 text-rose-700 hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-200 border border-rose-300 dark:border-rose-800/50 hover:border-rose-400 dark:hover:border-rose-700 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -638,7 +638,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
         {/* name + visibility grouped, left-aligned */}
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {item._name && (
-            <span className="text-gray-800 dark:text-slate-200 text-xs font-medium truncate min-w-0" title={item._name}>{item._name}</span>
+            <span className="text-gray-900 dark:text-slate-200 text-xs font-medium truncate min-w-0" title={item._name}>{item._name}</span>
           )}
           {visibilityLabel && (
             <span className={`flex-shrink-0 text-[10px] font-medium ${visibilityColor}`}>{visibilityLabel}</span>
@@ -646,9 +646,9 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
         </div>
         {/* unmanaged fields inline as key: value pairs */}
         {unmanagedFields.map(([k, v]) => (
-          <span key={k} className="flex-shrink-0 text-[10px] text-gray-400 dark:text-slate-500 hidden sm:inline">
-            <span className="text-gray-300 dark:text-slate-600">{k}:</span>{' '}
-            <span className="text-gray-700 dark:text-slate-300 font-mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+          <span key={k} className="flex-shrink-0 text-[10px] text-gray-500 dark:text-slate-500 hidden sm:inline">
+            <span className="text-gray-400 dark:text-slate-600">{k}:</span>{' '}
+            <span className="text-gray-800 dark:text-slate-300 font-mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
           </span>
         ))}
         {/* expand button */}
@@ -700,7 +700,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
           />
         )
         return (
-        <div className="border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950/40">
+        <div className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/40">
           {/* Relation metadata section */}
           {relationMeta && (
             <div className="px-3 pt-2.5 pb-1.5">
@@ -746,7 +746,7 @@ function RelatedItemCard({ item, copiedId, onCopyId, onEdit, visibleFields, onFe
           )}
           {/* Record fields */}
           <div className="px-3 py-2">
-            {recordTypeLabel && <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-slate-600 font-semibold mb-1.5">{recordTypeLabel}</p>}
+            {recordTypeLabel && <p className="text-[10px] uppercase tracking-widest text-gray-600 dark:text-slate-500 font-semibold mb-1.5">{recordTypeLabel}</p>}
             <ResizableColumns columns={[
               ...(nonManagedFields.length > 0 ? [{
                 id: 'fields', header: 'Fields', defaultWidth: 280,
@@ -819,7 +819,7 @@ function ExpandedRowPanel({
   const showFilterBar = selectedTraversal && !selectedTraversal.synthetic
 
   return (
-    <div className="bg-gray-50 dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-700/40">
+    <div className="bg-white dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-700/40">
       {/* Tab bar */}
       <div className="flex items-stretch border-b border-gray-200 dark:border-slate-800">
         {/* Record name */}
@@ -831,7 +831,7 @@ function ExpandedRowPanel({
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
             )}
-            <span className="text-xs font-semibold text-gray-700 dark:text-slate-300 truncate max-w-[180px]" title={title}>{title}</span>
+            <span className="text-xs font-semibold text-gray-900 dark:text-slate-300 truncate max-w-[180px]" title={title}>{title}</span>
             <span className="text-gray-200 dark:text-slate-700 select-none">|</span>
           </div>
         )}
@@ -841,8 +841,8 @@ function ExpandedRowPanel({
             onClick={() => onSelectTraversal(null)}
             className={`px-3 py-2 text-[11px] whitespace-nowrap border-b-2 transition-colors ${
               !selectedTraversal
-                ? 'border-blue-500 text-blue-300'
-                : 'border-transparent text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-300'
+                : 'border-transparent text-gray-500 dark:text-slate-500 hover:text-gray-800 dark:hover:text-slate-200 hover:border-gray-400 dark:hover:border-slate-600'
             }`}
           >
             Record
@@ -853,8 +853,8 @@ function ExpandedRowPanel({
               onClick={() => onSelectTraversal(t)}
               className={`px-3 py-2 text-[11px] whitespace-nowrap border-b-2 transition-colors ${
                 selectedTraversal?.subResource === t.subResource
-                  ? 'border-blue-500 text-blue-300'
-                  : 'border-transparent text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-300'
+                  : 'border-transparent text-gray-500 dark:text-slate-500 hover:text-gray-800 dark:hover:text-slate-200 hover:border-gray-400 dark:hover:border-slate-600'
               }`}
             >
               {t.label}
@@ -1065,7 +1065,7 @@ function ExpandedRowPanel({
                 <button
                   onClick={onAddItem}
                   disabled={traversalLoading}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-800/60 text-emerald-400 hover:text-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:hover:bg-emerald-800/60 border border-emerald-300 dark:border-emerald-800/60 text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   title={`Add to ${selectedTraversal?.label}`}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -1091,7 +1091,7 @@ function ExpandedRowPanel({
                 <button
                   onClick={onDeleteAll}
                   disabled={traversalLoading}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-rose-900/30 hover:bg-rose-800/50 border border-rose-800/50 text-rose-400 hover:text-rose-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-800/50 border border-rose-300 dark:border-rose-800/50 text-rose-700 hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   title={`Delete all ${selectedTraversal?.label}`}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -1503,7 +1503,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
   }
 
   return (
-    <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-800">
+    <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-transparent">
       {tooltip && (
         <div
           className="fixed z-50 pointer-events-none bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-xl text-xs"
@@ -1531,7 +1531,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
       )}
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-gray-50 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700">
+          <tr className="bg-gray-100 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700">
             {orderedColumns.map((col) => {
               const sortEntry = sortOrder?.find((s) => s.field === col.key)
               const isSorted = !!sortEntry
@@ -1542,7 +1542,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
                 onDragEnter={(e) => handleColDragEnter(e, col.key)}
                 onDragOver={handleColDragOver}
                 onDrop={(e) => handleColDrop(e, col.key)}
-                className={`group relative text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap select-none transition-colors hover:bg-gray-100 dark:hover:bg-slate-700/50 ${isSorted ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-slate-400'}${isDropTarget ? ' border-l-2 border-l-blue-500' : ''}`}
+                className={`group relative text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap select-none transition-colors hover:bg-gray-200 dark:hover:bg-slate-700/50 ${isSorted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-slate-400'}${isDropTarget ? ' border-l-2 border-l-blue-500' : ''}`}
                 onMouseEnter={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect()
                   setColTooltip({ key: col.key, x: rect.left, y: rect.bottom + 4 })
@@ -1726,13 +1726,13 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
             return (
             <Fragment key={rowId}>
             <tr
-              className={`group transition-colors hover:bg-gray-50 dark:hover:bg-slate-800/40 cursor-pointer${status === 'expired' ? ' opacity-60' : ''}`}
+              className={`group transition-colors bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-slate-800/40 cursor-pointer${status === 'expired' ? ' opacity-60' : ''}`}
               onClick={() => setExpandedRowId(isExpanded ? null : rowId)}
             >
               {orderedColumns.map((col, colIdx) => (
                 <td
                   key={col.key}
-                  className="px-4 py-3 text-gray-700 dark:text-slate-300 whitespace-nowrap max-w-[220px] truncate relative"
+                  className="px-4 py-3 text-gray-900 dark:text-slate-300 whitespace-nowrap max-w-[220px] truncate relative"
                   style={colIdx === 0 && status ? {
                     boxShadow: `inset 4px 0 0 ${STATUS_SHADOW_COLOR[status]}`,
                     transition: 'box-shadow 150ms ease',
