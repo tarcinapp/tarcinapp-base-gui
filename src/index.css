@@ -28,4 +28,14 @@
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+
+  /* Tab strip slide-in: max-width expansion works inside overflow-hidden parents */
+  .tab-strip-slide-in {
+    animation: tabStripSlideIn 0.2s ease-out forwards;
+    overflow: hidden;
+  }
+  @keyframes tabStripSlideIn {
+    from { max-width: 0; opacity: 0; }
+    to   { max-width: 2000px; opacity: 1; }
+  }
 }

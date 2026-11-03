@@ -9,35 +9,35 @@ import TraversalPage from './components/dynamic/TraversalPage'
 import ItemPage from './components/dynamic/ItemPage'
 
 function AppShell() {
-  const { isReady, oasStatus } = useApp()
+ const { isReady, oasStatus } = useApp()
 
-  // Show setup / loading / error screen until spec is successfully loaded
-  if (!isReady) {
-    return <SetupScreen />
-  }
+ // Show setup / loading / error screen until spec is successfully loaded
+ if (!isReady) {
+ return <SetupScreen />
+ }
 
-  return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="/r/:tagSlug" element={<ResourcePage />}>
-          <Route path="item/:itemId" element={<ItemPage />} />
-        </Route>
-        <Route path="/r/:tagSlug/:subResource" element={<TraversalPage />} />
-      </Route>
-    </Routes>
-  )
+ return (
+ <Routes>
+ <Route element={<AppLayout />}>
+ <Route index element={<DashboardPage />} />
+ <Route path="/r/:tagSlug" element={<ResourcePage />}>
+ <Route path="item/:itemId" element={<ItemPage />} />
+ </Route>
+ <Route path="/r/:tagSlug/:subResource" element={<TraversalPage />} />
+ </Route>
+ </Routes>
+ )
 }
 
 export default function App() {
-  return (
-    <ThemeProvider>
-      <AppProvider>
-        <BrowserRouter>
-          <AppShell />
-        </BrowserRouter>
-      </AppProvider>
-    </ThemeProvider>
-  )
+ return (
+ <ThemeProvider>
+ <AppProvider>
+ <BrowserRouter>
+ <AppShell />
+ </BrowserRouter>
+ </AppProvider>
+ </ThemeProvider>
+ )
 }
 
