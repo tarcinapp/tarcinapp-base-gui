@@ -1677,6 +1677,16 @@ export default function ResourcePage() {
  </button>
  )
  })}
+ {showFieldSelector && (
+ <button
+ type="button"
+ onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setFieldSelectorState({ mode: 'all', selected: new Set() }); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([]); setWhereInternalOp('and'); setHiddenFields(new Set()); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setPage(0) }}
+ className="relative flex items-center gap-1.5 h-9 px-3 text-xs whitespace-nowrap border-r border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-300"
+ title="Clear all filters and display settings"
+ >
+ Clear All
+ </button>
+ )}
  </div>
  )
  })()}
@@ -1869,8 +1879,9 @@ export default function ResourcePage() {
  )}
  </div>
 
- {/* Staging row */}
- <div className="flex items-center" ref={setsDropdownRef}>
+ {/* Staging row + dropdown wrapper — ref must cover both so outside-click detection works */}
+ <div ref={setsDropdownRef}>
+ <div className="flex items-center">
  <div className="inline-flex h-[30px] overflow-hidden border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors hover:border-gray-400 dark:hover:border-slate-500 focus-within:border-gray-400 dark:focus-within:border-slate-500">
  <button
  onClick={() => setSetsDropdownOpen((v) => !v)}
@@ -1882,11 +1893,11 @@ export default function ResourcePage() {
  <svg className="w-3 h-3 flex-shrink-0 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
  </button>
  {filterBuilderExpr === null ? (
- <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr(block); setStagedSetKeys([]); setStagedSetMeta({}); setPage(0) }} title="Add staged sets to the filter" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">Add</button>
+ <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr(block); setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0) }} title="Add staged sets to the filter" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">Add</button>
  ) : (
  <>
- <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr((prev) => appendBlock(prev, block, 'and')); setStagedSetKeys([]); setStagedSetMeta({}); setPage(0) }} title="Append with AND" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+and</button>
- <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr((prev) => appendBlock(prev, block, 'or')); setStagedSetKeys([]); setStagedSetMeta({}); setPage(0) }} title="Append with OR" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+or</button>
+ <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr((prev) => appendBlock(prev, block, 'and')); setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0) }} title="Append with AND" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+and</button>
+ <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr((prev) => appendBlock(prev, block, 'or')); setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0) }} title="Append with OR" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+or</button>
  </>
  )}
  {stagedSetKeys.length > 0 && (
@@ -1943,6 +1954,8 @@ export default function ResourcePage() {
  </div>
  </div>
  )}
+
+ </div>
 
  {filterBuilderExpr && (
  <VisualFilterBuilder expr={filterBuilderExpr} onChange={(next) => { setFilterBuilderExpr(next); setPage(0) }} />
