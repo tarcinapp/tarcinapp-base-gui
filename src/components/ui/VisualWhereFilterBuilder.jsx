@@ -38,25 +38,25 @@ function toggleOpToken(tokens, index) {
  )
 }
 
-export default function VisualWhereFilterBuilder({ expr, onChange }) {
- const tokens = useMemo(() => whereExprToTokens(expr), [expr])
+export default function VisualWhereFilterBuilder({ expr, onChange, inline = false }) {
+  const tokens = useMemo(() => whereExprToTokens(expr), [expr])
 
- if (!expr || tokens.length === 0) return null
+  if (!expr || tokens.length === 0) return null
 
- function handleRemoveCondition(index) {
- const next = removeConditionToken(tokens, index)
- onChange(whereTokensToExpr(next))
- }
+  function handleRemoveCondition(index) {
+    const next = removeConditionToken(tokens, index)
+    onChange(whereTokensToExpr(next))
+  }
 
- function handleToggleOp(index) {
- const next = toggleOpToken(tokens, index)
- onChange(whereTokensToExpr(next))
- }
+  function handleToggleOp(index) {
+    const next = toggleOpToken(tokens, index)
+    onChange(whereTokensToExpr(next))
+  }
 
- return (
- <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
- <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">fields</span>
- <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
+  const content = (
+    <>
+    {!inline && <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">fields</span>}
+    {!inline && <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>}
  {tokens.map((token, i) => {
  if (token.type === 'condition') {
  return (
@@ -113,17 +113,27 @@ export default function VisualWhereFilterBuilder({ expr, onChange }) {
  return null
  })}
 
+ {!inline && (
  <button
- type="button"
- onClick={() => onChange(null)}
- className="ml-auto flex items-center justify-center w-5 h-5 text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
- title="Clear field filter expression"
- aria-label="Clear field filter expression"
+   type="button"
+   onClick={() => onChange(null)}
+   className="ml-auto flex items-center justify-center w-5 h-5 text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+   title="Clear field filter expression"
+   aria-label="Clear field filter expression"
  >
- <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
- </svg>
+   <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+   </svg>
  </button>
- </div>
+ )}
+ </>
+ )
+
+ if (inline) return content
+
+ return (
+   <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
+   {content}
+   </div>
  )
 }

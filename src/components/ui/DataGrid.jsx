@@ -1733,16 +1733,12 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  <td
  key={col.key}
  className="px-4 py-3 text-gray-900 dark:text-slate-300 whitespace-nowrap max-w-[220px] truncate relative"
- style={colIdx === 0 && status ? {
- boxShadow: `inset 4px 0 0 ${STATUS_SHADOW_COLOR[status]}`,
- transition: 'box-shadow 150ms ease',
- } : undefined}
- onMouseEnter={colIdx === 0 && status ? (e) => {
+ onMouseEnter={col.key === '_id' && status ? (e) => {
  setHoveredRow(i)
  const rect = e.currentTarget.getBoundingClientRect()
  setTooltip({ x: rect.left + 16, y: rect.bottom + 6, row })
  } : undefined}
- onMouseLeave={colIdx === 0 && status ? () => {
+ onMouseLeave={col.key === '_id' && status ? () => {
  setHoveredRow(null)
  setTooltip(null)
  } : undefined}
@@ -1781,6 +1777,13 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  : col.key === '_id' && typeof row[col.key] === 'string'
  ? (
  <div className="flex items-center gap-1.5" title={row[col.key]}>
+ {status && (
+ <span
+ className="flex-shrink-0 w-1.5 h-1.5 rounded-full"
+ style={{ backgroundColor: STATUS_SHADOW_COLOR[status] }}
+ aria-label={status}
+ />
+ )}
  <span className="font-mono text-xs text-gray-700 dark:text-slate-300">{shortId(row[col.key])}</span>
  <button
  onClick={(e) => copyId(e, row[col.key])}

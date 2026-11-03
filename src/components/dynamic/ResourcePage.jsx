@@ -607,8 +607,9 @@ export default function ResourcePage() {
  const [activeFilterTab, setActiveFilterTab] = useState(null)
  // fieldSelectorState: { mode: 'all'|'exclude'|'none'|'include', selected: Set<string> }
  const [fieldSelectorState, setFieldSelectorState] = useState({ mode: 'all', selected: new Set() })
- // sortOrder: [{ field: string, dir: 'ASC'|'DESC' }]
+ // sortOrder: [{ field: string, dir: 'ASC'|'DESC' }] — applied; stagedSortOrder: staged in panel
  const [sortOrder, setSortOrder] = useState([])
+ const [stagedSortOrder, setStagedSortOrder] = useState([])
  const [selectedQ, setSelectedQ] = useState(null)
  const [selectedFieldset, setSelectedFieldset] = useState(null)
  const [queryInfoTab, setQueryInfoTab] = useState('request')
@@ -621,6 +622,12 @@ export default function ResourcePage() {
  const [visibilityDropdownOpen, setVisibilityDropdownOpen] = useState(false)
  const [fieldDropdownOpen, setFieldDropdownOpen] = useState(false)
  const [hiddenFieldDropdownOpen, setHiddenFieldDropdownOpen] = useState(false)
+ const [sortFieldDropdownOpen, setSortFieldDropdownOpen] = useState(false)
+ const [sortFieldSearch, setSortFieldSearch] = useState('')
+ const [sortFieldHighlight, setSortFieldHighlight] = useState(-1)
+ const [whereClauseOpen, setWhereClauseOpen] = useState(false)
+ const [whereFieldSearch, setWhereFieldSearch] = useState('')
+ const [whereFieldHighlight, setWhereFieldHighlight] = useState(-1)
  const qDropdownRef = useRef(null)
  const fieldsetDropdownRef = useRef(null)
  const setsDropdownRef = useRef(null)
@@ -628,6 +635,10 @@ export default function ResourcePage() {
  const visibilityDropdownRef = useRef(null)
  const fieldDropdownRef = useRef(null)
  const hiddenFieldDropdownRef = useRef(null)
+ const sortFieldDropdownRef = useRef(null)
+ const sortFieldListRef = useRef(null)
+ const whereClausePanelRef = useRef(null)
+ const whereFieldListRef = useRef(null)
  const isResizing = useRef(false)
  const resizeStartX = useRef(0)
  const resizeStartWidth = useRef(0)
@@ -837,7 +848,7 @@ export default function ResourcePage() {
  setSortOrder([])
  setFilterBuilderExpr(null)
  setWhereBuilderExpr(null)
- setStagedWhereClauses([])
+ setStagedWhereClauses([makeEmptyWhereClause()])
  setWhereInternalOp('and')
  setStagedSetKeys([])
  setStagedSetMeta({})
@@ -908,6 +919,32 @@ export default function ResourcePage() {
  document.addEventListener('mousedown', handler)
  return () => document.removeEventListener('mousedown', handler)
  }, [hiddenFieldDropdownOpen])
+
+ useEffect(() => {
+ if (!sortFieldDropdownOpen) return undefined
+ const handler = (e) => { if (sortFieldDropdownRef.current && !sortFieldDropdownRef.current.contains(e.target)) setSortFieldDropdownOpen(false) }
+ document.addEventListener('mousedown', handler)
+ return () => document.removeEventListener('mousedown', handler)
+ }, [sortFieldDropdownOpen])
+
+ useEffect(() => {
+ if (sortFieldHighlight < 0 || !sortFieldListRef.current) return
+ const el = sortFieldListRef.current.querySelector(`[data-sort-idx="${sortFieldHighlight}"]`)
+ if (el) el.scrollIntoView({ block: 'nearest' })
+ }, [sortFieldHighlight])
+
+ useEffect(() => {
+ if (!whereClauseOpen) return undefined
+ const handler = (e) => { if (whereClausePanelRef.current && !whereClausePanelRef.current.contains(e.target)) { setWhereClauseOpen(false); setWhereFieldSearch(''); setWhereFieldHighlight(-1) } }
+ document.addEventListener('mousedown', handler)
+ return () => document.removeEventListener('mousedown', handler)
+ }, [whereClauseOpen])
+
+ useEffect(() => {
+ if (whereFieldHighlight < 0 || !whereFieldListRef.current) return
+ const el = whereFieldListRef.current.querySelector(`[data-where-idx="${whereFieldHighlight}"]`)
+ if (el) el.scrollIntoView({ block: 'nearest' })
+ }, [whereFieldHighlight])
 
  useEffect(() => {
  if (!toastError) return undefined
@@ -1621,17 +1658,40 @@ export default function ResourcePage() {
  sortOrder.length > 0,
  ].filter(Boolean).length
  return (
- <div className={`inline-flex items-center border border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden transition-all`}>
- {/* Tab buttons — slide in from the left edge, pushing filter btn + search right */}
+ <div className="inline-flex items-center h-9 border border-gray-200 dark:border-slate-700 overflow-hidden transition-all">
+ {/* Advanced search / filter button — always at the left edge, tabs slide out to the right */}
+ <button
+ onClick={() => { setFilterPanelOpen((v) => { if (v) setActiveFilterTab(null); return !v }) }}
+ className={`relative flex items-center gap-1.5 h-full flex-shrink-0 transition-colors border-r border-gray-200 dark:border-slate-700 ${
+ filterPanelOpen || activeFilterCount > 0
+ ? 'bg-blue-700 text-white px-2.5'
+ : 'justify-center w-9 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
+ }`}
+ title={filterPanelOpen ? 'Close advanced search' : 'Advanced search'}
+ aria-label={filterPanelOpen ? 'Close advanced search' : 'Advanced search'}
+ >
+ {filterPanelOpen ? (
+ <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+ <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+ </svg>
+ ) : (
+ <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+ <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M7 12h10M11 18h2" />
+ </svg>
+ )}
+ {filterPanelOpen && (
+ <span className="text-xs font-medium whitespace-nowrap">Advanced Search</span>
+ )}
+ {activeFilterCount > 0 && !filterPanelOpen && (
+ <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-300" />
+ )}
+ </button>
+ {/* Tab buttons — slide out to the right of the filter button */}
  {(() => {
- const hasStatus = navItem.hasSet && navItem.hasValidityDates && navItem.setSchemaProps && ['actives', 'pendings', 'expireds'].some((k) => k in navItem.setSchemaProps)
- const hasVisibility = navItem.hasSet && navItem.setSchemaProps && ['publics', 'protecteds', 'privates'].some((k) => k in navItem.setSchemaProps)
  const tabs = [
  ...(navItem.hasSet && navItem.setSchemaProps ? [{ id: 'sets', label: 'Sets' }] : []),
  ...(navItem.hasFilterWhere ? [{ id: 'where', label: 'Where' }] : []),
  ...(navItem.hasFilterOrder ? [{ id: 'sort', label: 'Sort' }] : []),
- ...(hasStatus ? [{ id: 'status', label: 'Status' }] : []),
- ...(hasVisibility ? [{ id: 'visibility', label: 'Visibility' }] : []),
  ...(showFieldSelector ? [{ id: 'fieldRetrieval', label: 'Field Retrieval' }] : []),
  ...(showFieldSelector ? [{ id: 'fieldDisplay', label: 'Field Display' }] : []),
  ]
@@ -1639,8 +1699,6 @@ export default function ResourcePage() {
  if (id === 'sets') return filterBuilderExpr !== null
  if (id === 'where') return whereBuilderExpr !== null
  if (id === 'sort') return sortOrder.length > 0
- if (id === 'status') return collectSetKeysFromExpr(filterBuilderExpr, ['actives','pendings','expireds'].filter((k) => k in (navItem.setSchemaProps ?? {}))).length > 0
- if (id === 'visibility') return collectSetKeysFromExpr(filterBuilderExpr, ['publics','protecteds','privates'].filter((k) => k in (navItem.setSchemaProps ?? {}))).length > 0
  if (id === 'fieldRetrieval') return fieldSelectorState.mode !== 'all'
  if (id === 'fieldDisplay') return hiddenFields.size > 0
  return false
@@ -1662,7 +1720,15 @@ export default function ResourcePage() {
  <button
  key={tab.id}
  type="button"
- onClick={() => setActiveFilterTab((prev) => prev === tab.id ? null : tab.id)}
+ onClick={() => {
+ setActiveFilterTab((prev) => {
+ const next = prev === tab.id ? null : tab.id
+ if (next === 'where') {
+ setStagedWhereClauses((clauses) => clauses.length === 0 ? [makeEmptyWhereClause()] : clauses)
+ }
+ return next
+ })
+ }}
  className={`relative flex items-center gap-1.5 h-9 px-3 text-xs whitespace-nowrap border-r border-gray-200 dark:border-slate-700 ${
  isActive
  ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white font-medium'
@@ -1670,7 +1736,11 @@ export default function ResourcePage() {
  }`}
  title={tab.label}
  >
- {tab.label}
+ {/* Invisible bold copy reserves width so toggling font-medium never shifts layout */}
+ <span className="flex flex-col items-center">
+ <span aria-hidden="true" className="font-medium invisible h-0 overflow-hidden select-none">{tab.label}</span>
+ <span>{tab.label}</span>
+ </span>
  {hasIndicator && !isActive && (
  <span className="inline-block w-1.5 h-1.5 bg-blue-500 flex-shrink-0" />
  )}
@@ -1680,7 +1750,7 @@ export default function ResourcePage() {
  {showFieldSelector && (
  <button
  type="button"
- onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setFieldSelectorState({ mode: 'all', selected: new Set() }); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([]); setWhereInternalOp('and'); setHiddenFields(new Set()); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setPage(0) }}
+ onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setStagedSortOrder([]); setFieldSelectorState({ mode: 'all', selected: new Set() }); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setHiddenFields(new Set()); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setPage(0) }}
  className="relative flex items-center gap-1.5 h-9 px-3 text-xs whitespace-nowrap border-r border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-300"
  title="Clear all filters and display settings"
  >
@@ -1690,33 +1760,9 @@ export default function ResourcePage() {
  </div>
  )
  })()}
- {/* Advanced search / filter button — always right of the tabs */}
- <button
- onClick={() => { setFilterPanelOpen((v) => { if (v) setActiveFilterTab(null); return !v }) }}
- className={`relative flex items-center justify-center w-9 h-9 flex-shrink-0 transition-colors ${
- filterPanelOpen || activeFilterCount > 0
- ? 'bg-blue-700 text-white'
- : 'bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
- }`}
- title={filterPanelOpen ? 'Close advanced search' : 'Advanced search'}
- aria-label={filterPanelOpen ? 'Close advanced search' : 'Advanced search'}
- >
- {filterPanelOpen ? (
- <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
- <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
- </svg>
- ) : (
- <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
- <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M7 12h10M11 18h2" />
- </svg>
- )}
- {activeFilterCount > 0 && !filterPanelOpen && (
- <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-300" />
- )}
- </button>
- {/* Search input — always visible when search is available */}
+ {/* Search input — inside the same border container, no extra left border */}
  {navItem.hasSearch && (
- <div className="relative bg-white dark:bg-slate-800 h-9" style={{ width: '240px' }}>
+ <div className="relative bg-white dark:bg-slate-800 h-full" style={{ width: '240px' }}>
  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
  </svg>
@@ -1871,57 +1917,36 @@ export default function ResourcePage() {
 
  {/* ── Sets tab ── */}
  {activeFilterTab === 'sets' && navItem.hasSet && navItem.setSchemaProps && (
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Sets</p>
- {filterBuilderExpr !== null && (
- <button onClick={() => { setFilterBuilderExpr(null); setStagedSetKeys([]); setStagedSetMeta({}); setPage(0) }} className="text-xs text-gray-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">Clear</button>
- )}
- </div>
+ <div className="relative flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
 
- {/* Staging row + dropdown wrapper — ref must cover both so outside-click detection works */}
- <div ref={setsDropdownRef}>
- <div className="flex items-center">
- <div className="inline-flex h-[30px] overflow-hidden border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors hover:border-gray-400 dark:hover:border-slate-500 focus-within:border-gray-400 dark:focus-within:border-slate-500">
- <button
- onClick={() => setSetsDropdownOpen((v) => !v)}
- className="flex h-full w-[200px] items-center justify-between bg-white dark:bg-slate-800 px-2.5 text-xs transition-colors outline-none hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-0 text-gray-700 dark:text-slate-300"
- >
- <span className="flex-1 min-w-0 truncate text-left mr-1.5">
- {stagedSetKeys.length > 0 ? stagedSetKeys.join(', ') : <span className="text-gray-400 dark:text-slate-500">— select sets —</span>}
- </span>
- <svg className="w-3 h-3 flex-shrink-0 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
- </button>
- {filterBuilderExpr === null ? (
- <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr(block); setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0) }} title="Add staged sets to the filter" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">Add</button>
- ) : (
- <>
- <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr((prev) => appendBlock(prev, block, 'and')); setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0) }} title="Append with AND" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+and</button>
- <button disabled={stagedSetKeys.length === 0} onClick={() => { const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }])); const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp); if (!block) return; setFilterBuilderExpr((prev) => appendBlock(prev, block, 'or')); setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0) }} title="Append with OR" className="flex h-full items-center px-2.5 text-[10px] font-bold font-mono uppercase bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+or</button>
- </>
- )}
- {stagedSetKeys.length > 0 && (
- <button onClick={() => { setStagedSetKeys([]); setStagedSetMeta({}) }} className="flex h-full items-center justify-center px-2 bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Clear staged" aria-label="Clear staged">
- <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
- </button>
- )}
- </div>
- </div>
+ {/* Static label */}
+ <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">Sets</span>
+ <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
 
- {/* Dropdown panel */}
- {setsDropdownOpen && (
- <div className="relative">
- <div className="absolute left-0 top-0 z-20 min-w-[280px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl p-3 space-y-3">
- <div className="flex items-center gap-2">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium shrink-0">Join with</p>
- <div className="inline-flex border border-gray-200 dark:border-slate-700 overflow-hidden">
- {['or', 'and'].map((op) => (
- <button key={op} type="button" onClick={() => setSetsInternalOp(op)} className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${setsInternalOp === op ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'}`}>{op}</button>
- ))}
- </div>
- </div>
- <hr className="border-gray-200 dark:border-slate-700/60" />
- <p className="text-[10px] text-gray-400 dark:text-slate-600 italic">Select sets below, then click <span className="font-bold not-italic text-gray-500 dark:text-slate-500">+ and</span> or <span className="font-bold not-italic text-gray-500 dark:text-slate-500">+ or</span> to append.</p>
+ {/* Applied set chips — inline, no nested container */}
+ {filterBuilderExpr ? (
+ <VisualFilterBuilder inline expr={filterBuilderExpr} onChange={(next) => { setFilterBuilderExpr(next); setPage(0) }} />
+ ) : null}
+
+ {/* Add Set button + floating panel */}
+ <span className="relative inline-flex items-center" ref={setsDropdownRef}>
+ <button type="button" onClick={() => { setSetsDropdownOpen((v) => { if (!v) { setStagedSetKeys([]); setStagedSetMeta({}) } return !v }) }} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors">
+ <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+ Add Set
+ </button>
+
+ {setsDropdownOpen && (() => {
+ const doApplySets = (joinOp) => {
+ const mp = Object.fromEntries(stagedSetKeys.map((k) => [k, { ...(navItem.setSchemaProps[k] ?? {}), ...(stagedSetMeta[k] ?? {}) }]))
+ const block = buildBlockFromKeys(stagedSetKeys, mp, setsInternalOp)
+ if (!block) return
+ if (filterBuilderExpr === null) { setFilterBuilderExpr(block) } else { setFilterBuilderExpr((prev) => appendBlock(prev, block, joinOp)) }
+ setStagedSetKeys([]); setStagedSetMeta({}); setSetsDropdownOpen(false); setPage(0)
+ }
+ return (
+ <div className="absolute left-0 top-full mt-1 z-30 w-[300px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl">
+ {/* Set checkboxes */}
+ <div className="p-3 space-y-2 max-h-[260px] overflow-y-auto">
  {Object.entries(navItem.setSchemaProps).map(([key, meta]) => {
  const isStaged = stagedSetKeys.includes(key)
  return (
@@ -1952,171 +1977,259 @@ export default function ResourcePage() {
  )
  })}
  </div>
+ {/* Panel footer */}
+ <div className="flex items-center gap-2 px-3 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950">
+ <div className="flex items-center gap-1 flex-shrink-0">
+ {['and', 'or'].map((op) => (
+ <button key={op} type="button" onClick={() => setSetsInternalOp(op)} className={`px-1.5 py-0.5 text-[10px] font-mono font-bold uppercase border transition-colors ${setsInternalOp === op ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'}`}>{op}</button>
+ ))}
+ <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono ml-1">join with</span>
  </div>
+ <div className="ml-auto flex items-center gap-1.5">
+ {filterBuilderExpr === null ? (
+ <button type="button" disabled={stagedSetKeys.length === 0} onClick={() => doApplySets('and')} className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">Apply</button>
+ ) : (
+ <>
+ <button type="button" disabled={stagedSetKeys.length === 0} onClick={() => doApplySets('and')} className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+ and</button>
+ <button type="button" disabled={stagedSetKeys.length === 0} onClick={() => doApplySets('or')} className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+ or</button>
+ </>
  )}
-
  </div>
+ </div>
+ </div>
+ )
+ })()}
+ </span>
 
+ {/* Clear-all — far right */}
  {filterBuilderExpr && (
- <VisualFilterBuilder expr={filterBuilderExpr} onChange={(next) => { setFilterBuilderExpr(next); setPage(0) }} />
+ <button type="button" onClick={() => { setFilterBuilderExpr(null); setPage(0) }} className="ml-auto flex items-center justify-center w-5 h-5 text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" title="Clear set filter" aria-label="Clear set filter">
+ <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
  )}
+
  </div>
  )}
 
  {/* ── Where tab ── */}
  {activeFilterTab === 'where' && navItem.hasFilterWhere && (
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Field Filters (Where)</p>
- {whereBuilderExpr !== null && (
- <button onClick={() => { setWhereBuilderExpr(null); setStagedWhereClauses([]); setWhereInternalOp('and'); setPage(0) }} className="text-xs text-gray-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">Clear</button>
- )}
- </div>
- <div className="space-y-2.5">
- {stagedWhereClauses.length > 0 && (
- <div className="space-y-2">
- {stagedWhereClauses.map((clause) => {
+ <div className="relative flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
+
+ {/* Static label — always visible */}
+ <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">Clauses</span>
+ <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
+
+ {/* Applied where chips — inline so they share our container, not a nested box */}
+ {whereBuilderExpr ? (
+ <VisualWhereFilterBuilder inline expr={whereBuilderExpr} onChange={(next) => { setWhereBuilderExpr(next); setPage(0) }} />
+ ) : null}
+
+ {/* Add Where Clause button + floating panel */}
+ <span className="relative inline-flex items-center" ref={whereClausePanelRef}>
+ <button type="button" onClick={() => { setWhereClauseOpen((v) => { if (!v) { setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setWhereFieldSearch(''); setWhereFieldHighlight(-1) } return !v }) }} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors">
+ <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+ Add Where Clause
+ </button>
+
+ {whereClauseOpen && (() => {
+ const whereFiltered = whereFieldSearch ? availableFields.filter((f) => f.toLowerCase().includes(whereFieldSearch.toLowerCase())) : availableFields
+ const whereNavigable = whereFiltered.reduce((acc, f, i) => { acc.push(i); return acc }, [])
+ const handleWhereFieldKeyDown = (clauseId) => (e) => {
+ if (e.key === 'ArrowDown') {
+ e.preventDefault()
+ setWhereFieldHighlight((prev) => { const cur = whereNavigable.indexOf(prev); return whereNavigable[cur + 1] ?? whereNavigable[0] ?? -1 })
+ } else if (e.key === 'ArrowUp') {
+ e.preventDefault()
+ setWhereFieldHighlight((prev) => { const cur = whereNavigable.indexOf(prev); return whereNavigable[cur - 1] ?? whereNavigable[whereNavigable.length - 1] ?? -1 })
+ } else if (e.key === 'Enter') {
+ e.preventDefault()
+ const f = whereFiltered[whereFieldHighlight]
+ if (f) { setStagedWhereClauses((prev) => prev.map((c) => c.id === clauseId ? { ...c, field: f, _fieldOpen: false } : c)); setWhereFieldSearch(''); setWhereFieldHighlight(-1) }
+ } else if (e.key === 'Escape') {
+ setStagedWhereClauses((prev) => prev.map((c) => c.id === clauseId ? { ...c, _fieldOpen: false } : c)); setWhereFieldSearch(''); setWhereFieldHighlight(-1)
+ }
+ }
+ const doApply = () => {
+ const block = buildWhereBlockFromClauses(stagedWhereClauses, whereInternalOp)
+ if (!block) return
+ if (whereBuilderExpr === null) { setWhereBuilderExpr(block) } else { setWhereBuilderExpr((prev) => appendWhereBlock(prev, block, 'and')) }
+ setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setWhereClauseOpen(false); setWhereFieldSearch(''); setPage(0)
+ }
+ return (
+ <div className="absolute left-0 top-full mt-1 z-30 w-[520px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl" onKeyDown={(e) => { if (e.key === 'Enter' && !stagedWhereClauses.some((c) => c._fieldOpen)) { e.preventDefault(); doApply() } }}>
+ {/* Clause rows */}
+ <div className="p-3 space-y-2">
+ {stagedWhereClauses.map((clause, ci) => {
  const needsSecondValue = WHERE_OP_SECOND_VALUE.has(clause.op)
  const isListOp = clause.op === 'inq' || clause.op === 'nin'
+ const isFieldPickerOpen = clause._fieldOpen ?? false
+ const clauseFiltered = whereFieldSearch && isFieldPickerOpen ? availableFields.filter((f) => f.toLowerCase().includes(whereFieldSearch.toLowerCase())) : availableFields
  return (
- <div key={clause.id} className="grid grid-cols-[minmax(120px,1fr)_minmax(100px,130px)_minmax(140px,1fr)_auto] gap-2 items-start">
- <select value={clause.field} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, field: e.target.value } : c))} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
- <option value="">field…</option>
- {availableFields.map((f) => <option key={f} value={f}>{f}</option>)}
- </select>
- <select value={clause.op} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, op: e.target.value } : c))} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
+ <div key={clause.id} className="flex items-center gap-1.5">
+ {/* Join operator badge — inline at left of each subsequent clause */}
+ {ci > 0 && (
+ <div className="flex items-center gap-1 flex-shrink-0">
+ {['and', 'or'].map((op) => (
+ <button key={op} type="button" onClick={() => setWhereInternalOp(op)} className={`px-1.5 py-0.5 text-[10px] font-mono font-bold uppercase border transition-colors ${whereInternalOp === op ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'}`}>{op}</button>
+ ))}
+ </div>
+ )}
+ {/* Field picker */}
+ <div className="relative w-[140px] flex-shrink-0">
+ <button type="button" onClick={() => { setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, _fieldOpen: !isFieldPickerOpen } : { ...c, _fieldOpen: false })); setWhereFieldSearch(''); setWhereFieldHighlight(-1) }} className={`w-full h-[26px] flex items-center justify-between px-2 text-xs font-mono border transition-colors ${clause.field ? 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-500'} hover:border-gray-400 dark:hover:border-slate-500`}>
+ <span className="truncate">{clause.field || 'field…'}</span>
+ <svg className="w-3 h-3 flex-shrink-0 ml-1 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+ </button>
+ {isFieldPickerOpen && (
+ <div className="absolute left-0 top-full mt-0.5 z-40 w-[180px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl">
+ <div className="px-2 py-1.5 border-b border-gray-200 dark:border-slate-700">
+ <input type="text" autoFocus value={whereFieldSearch} onChange={(e) => { setWhereFieldSearch(e.target.value); setWhereFieldHighlight(-1) }} onKeyDown={handleWhereFieldKeyDown(clause.id)} placeholder="Search fields…" className="w-full h-[24px] px-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+ </div>
+ <div ref={whereFieldListRef} className="overflow-y-auto max-h-[160px] py-1">
+ {clauseFiltered.length === 0
+ ? <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No match.</p>
+ : clauseFiltered.map((f, idx) => (
+ <button key={f} type="button" data-where-idx={idx} onClick={() => { setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, field: f, _fieldOpen: false } : c)); setWhereFieldSearch(''); setWhereFieldHighlight(-1) }} onMouseEnter={() => setWhereFieldHighlight(idx)} className={`w-full text-left px-3 py-1.5 text-xs font-mono transition-colors ${idx === whereFieldHighlight ? 'bg-blue-50 dark:bg-blue-900/30 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'}`}>
+ {f}
+ </button>
+ ))}
+ </div>
+ </div>
+ )}
+ </div>
+ {/* Operator */}
+ <select value={clause.op} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, op: e.target.value } : c))} className="h-[26px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 flex-shrink-0">
  {WHERE_OPERATOR_OPTIONS.map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
  </select>
- <div className="space-y-1">
- <input type="text" value={clause.value} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, value: e.target.value } : c))} placeholder={isListOp ? 'v1, v2, v3' : 'value'} className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
- {needsSecondValue && (<input type="text" value={clause.value2} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, value2: e.target.value } : c))} placeholder="second value" className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-1 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />)}
- </div>
- <button type="button" onClick={() => setStagedWhereClauses((prev) => prev.filter((c) => c.id !== clause.id))} className="mt-1 text-slate-500 hover:text-rose-400 transition-colors" aria-label="Remove clause">
- <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ {/* Value(s) */}
+ <input type="text" value={clause.value} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, value: e.target.value } : c))} placeholder={isListOp ? 'v1, v2, v3' : 'value'} className="h-[26px] flex-1 min-w-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+ {needsSecondValue && <input type="text" value={clause.value2} onChange={(e) => setStagedWhereClauses((prev) => prev.map((c) => c.id === clause.id ? { ...c, value2: e.target.value } : c))} placeholder="second value" className="h-[26px] w-[90px] flex-shrink-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />}
+ {/* Remove — same line, only when >1 clause */}
+ {stagedWhereClauses.length > 1 && (
+ <button type="button" onClick={() => setStagedWhereClauses((prev) => prev.filter((c) => c.id !== clause.id))} className="flex-shrink-0 text-slate-400 hover:text-rose-400 transition-colors" aria-label="Remove clause">
+ <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
  </button>
+ )}
  </div>
  )
  })}
  </div>
- )}
- {stagedWhereClauses.length > 1 && (
- <div className="flex items-center gap-2">
- <span className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Join staged with</span>
- <div className="inline-flex border border-gray-200 dark:border-slate-700 overflow-hidden">
- {['and', 'or'].map((op) => (<button key={op} type="button" onClick={() => setWhereInternalOp(op)} className={`px-2 py-0.5 text-[10px] font-mono uppercase border-r border-gray-200 dark:border-slate-700 last:border-r-0 transition-colors ${whereInternalOp === op ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'}`}>{op}</button>))}
- </div>
- </div>
- )}
- <div className="flex flex-wrap items-center gap-2">
- <button type="button" onClick={() => setStagedWhereClauses((prev) => [...prev, makeEmptyWhereClause()])} className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Add Clause</button>
+ {/* Panel footer: add another clause + apply */}
+ <div className="flex items-center gap-2 px-3 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950">
+ <button type="button" onClick={() => { setStagedWhereClauses((prev) => [...prev, makeEmptyWhereClause()]); setWhereFieldSearch(''); setWhereFieldHighlight(-1) }} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors">
+ <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+ Add Clause
+ </button>
+ <div className="ml-auto flex items-center gap-1.5">
  {whereBuilderExpr === null ? (
- stagedWhereClauses.length > 0 && (
- <button type="button" onClick={() => { const block = buildWhereBlockFromClauses(stagedWhereClauses, whereInternalOp); if (!block) return; setWhereBuilderExpr(block); setStagedWhereClauses([]); setWhereInternalOp('and'); setPage(0) }} className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Apply</button>
- )
+ <button type="button" onClick={doApply} className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Apply</button>
  ) : (
  <>
- <button type="button" disabled={stagedWhereClauses.length === 0} onClick={() => { const block = buildWhereBlockFromClauses(stagedWhereClauses, whereInternalOp); if (!block) return; setWhereBuilderExpr((prev) => appendWhereBlock(prev, block, 'and')); setStagedWhereClauses([]); setWhereInternalOp('and'); setPage(0) }} className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+and</button>
- <button type="button" disabled={stagedWhereClauses.length === 0} onClick={() => { const block = buildWhereBlockFromClauses(stagedWhereClauses, whereInternalOp); if (!block) return; setWhereBuilderExpr((prev) => appendWhereBlock(prev, block, 'or')); setStagedWhereClauses([]); setWhereInternalOp('and'); setPage(0) }} className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+or</button>
+ <button type="button" onClick={() => { const block = buildWhereBlockFromClauses(stagedWhereClauses, whereInternalOp); if (!block) return; setWhereBuilderExpr((prev) => appendWhereBlock(prev, block, 'and')); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setWhereClauseOpen(false); setWhereFieldSearch(''); setPage(0) }} className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+ and</button>
+ <button type="button" onClick={() => { const block = buildWhereBlockFromClauses(stagedWhereClauses, whereInternalOp); if (!block) return; setWhereBuilderExpr((prev) => appendWhereBlock(prev, block, 'or')); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setWhereClauseOpen(false); setWhereFieldSearch(''); setPage(0) }} className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+ or</button>
  </>
  )}
- {stagedWhereClauses.length > 0 && (<button type="button" onClick={() => { setStagedWhereClauses([]); setWhereInternalOp('and') }} className="px-2 py-1 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200">Clear staged</button>)}
  </div>
  </div>
+ </div>
+ )
+ })()}
+ </span>
+
+ {/* Clear-all — far right, only when there are applied clauses */}
  {whereBuilderExpr && (
- <VisualWhereFilterBuilder expr={whereBuilderExpr} onChange={(next) => { setWhereBuilderExpr(next); setPage(0) }} />
+ <button type="button" onClick={() => { setWhereBuilderExpr(null); setPage(0) }} className="ml-auto flex items-center justify-center w-5 h-5 text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" title="Clear where filter" aria-label="Clear where filter">
+ <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
  )}
+
  </div>
  )}
 
  {/* ── Sort tab ── */}
  {activeFilterTab === 'sort' && navItem.hasFilterOrder && (
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Sort</p>
- {sortOrder.length > 0 && (<button onClick={() => { setSortOrder([]); setPage(0) }} className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">Clear</button>)}
- </div>
- {sortOrder.map((entry, i) => (
- <div key={i} className="flex items-center gap-2">
- <span className="text-[10px] font-mono text-gray-400 dark:text-slate-500 w-4 flex-shrink-0">{i + 1}.</span>
- <select value={entry.field} onChange={(e) => setSortOrder((prev) => prev.map((s, idx) => idx === i ? { ...s, field: e.target.value } : s))} className="flex-1 min-w-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-1.5 text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
- {availableFields.map((f) => <option key={f} value={f}>{f}</option>)}
- </select>
- <button onClick={() => setSortOrder((prev) => prev.map((s, idx) => idx === i ? { ...s, dir: s.dir === 'ASC' ? 'DESC' : 'ASC' } : s))} className="inline-flex items-center gap-1 px-2 py-1.5 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors font-mono flex-shrink-0">
- {entry.dir === 'ASC' ? (<svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>) : (<svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>)}
- {entry.dir}
+ <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
+ <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">Sort</span>
+ <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
+ {/* Applied sort chips — left of the add button, click toggles direction */}
+ {sortOrder.map((s, i) => (
+ <button key={i} type="button" onClick={() => { setSortOrder((prev) => prev.map((x, idx) => idx === i ? { ...x, dir: x.dir === 'ASC' ? 'DESC' : 'ASC' } : x)); setPage(0) }} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 border text-xs font-mono bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors" title="Click to toggle direction">
+ {s.dir === 'ASC' ? (<svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>) : (<svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>)}
+ <span>{s.field}</span>
+ <span onClick={(e) => { e.stopPropagation(); setSortOrder((prev) => prev.filter((_, idx) => idx !== i)); setPage(0) }} className="opacity-50 hover:opacity-100 transition-opacity ml-0.5 cursor-pointer" role="button" aria-label={`Remove ${s.field}`}>
+ <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </span>
  </button>
- <button onClick={() => { setSortOrder((prev) => prev.filter((_, idx) => idx !== i)); setPage(0) }} className="flex-shrink-0 text-slate-500 hover:text-rose-400 transition-colors" aria-label="Remove sort">
- <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
- </button>
- </div>
  ))}
- <button onClick={() => setSortOrder((prev) => [...prev, { field: availableFields[0] ?? '_id', dir: 'ASC' }])} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
- <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
- Add sort field
+ {/* Add field dropdown */}
+ <span className="relative inline-flex items-center" ref={sortFieldDropdownRef}>
+ <button type="button" onClick={() => { setSortFieldDropdownOpen((v) => !v); setSortFieldSearch('') }} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors">
+ <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+ Add Sorting Field
  </button>
- {sortOrder.length > 0 && (<p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{sortOrder.map((s) => `${s.field} ${s.dir}`).join(', ')}</p>)}
+ {sortFieldDropdownOpen && (() => {
+ const sortFiltered = sortFieldSearch ? availableFields.filter((f) => f.toLowerCase().includes(sortFieldSearch.toLowerCase())) : availableFields
+ const navigableIndexes = sortFiltered.reduce((acc, f, i) => { if (!sortOrder.some((s) => s.field === f)) acc.push(i); return acc }, [])
+ const handleSortKeyDown = (e) => {
+ if (e.key === 'ArrowDown') {
+ e.preventDefault()
+ setSortFieldHighlight((prev) => {
+ const cur = navigableIndexes.indexOf(prev)
+ return navigableIndexes[cur + 1] ?? navigableIndexes[0] ?? -1
+ })
+ } else if (e.key === 'ArrowUp') {
+ e.preventDefault()
+ setSortFieldHighlight((prev) => {
+ const cur = navigableIndexes.indexOf(prev)
+ return navigableIndexes[cur - 1] ?? navigableIndexes[navigableIndexes.length - 1] ?? -1
+ })
+ } else if (e.key === 'Enter') {
+ e.preventDefault()
+ const f = sortFiltered[sortFieldHighlight]
+ if (f && !sortOrder.some((s) => s.field === f)) { setSortOrder((prev) => [...prev, { field: f, dir: 'ASC' }]); setSortFieldDropdownOpen(false); setSortFieldSearch(''); setSortFieldHighlight(-1); setPage(0) }
+ } else if (e.key === 'Escape') {
+ setSortFieldDropdownOpen(false); setSortFieldSearch(''); setSortFieldHighlight(-1)
+ }
+ }
+ return (
+ <div className="absolute left-0 top-full mt-1 z-20 w-[200px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl">
+ {/* Search box */}
+ <div className="px-2 py-1.5 border-b border-gray-200 dark:border-slate-700">
+ <input
+ type="text"
+ autoFocus
+ value={sortFieldSearch}
+ onChange={(e) => { setSortFieldSearch(e.target.value); setSortFieldHighlight(-1) }}
+ onKeyDown={handleSortKeyDown}
+ placeholder="Search fields…"
+ className="w-full h-[24px] px-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+ />
+ </div>
+ {/* Scrollable field list */}
+ <div ref={sortFieldListRef} className="overflow-y-auto max-h-[180px] py-1">
+ {sortFiltered.length === 0
+ ? <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No match.</p>
+ : sortFiltered.map((f, idx) => {
+ const alreadyAdded = sortOrder.some((s) => s.field === f)
+ const isHighlighted = idx === sortFieldHighlight
+ return (
+ <button key={f} type="button" data-sort-idx={idx} disabled={alreadyAdded} onClick={() => { setSortOrder((prev) => [...prev, { field: f, dir: 'ASC' }]); setSortFieldDropdownOpen(false); setSortFieldSearch(''); setSortFieldHighlight(-1); setPage(0) }} onMouseEnter={() => { if (!alreadyAdded) setSortFieldHighlight(idx) }} className={`w-full text-left px-3 py-1.5 text-xs font-mono transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isHighlighted ? 'bg-blue-50 dark:bg-blue-900/30 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'}`}>
+ {f}
+ </button>
+ )
+ })}
+ </div>
+ </div>
+ )
+ })()}
+ </span>
+ {sortOrder.length > 0 && (
+ <button type="button" onClick={() => { setSortOrder([]); setPage(0) }} className="ml-auto flex items-center justify-center w-5 h-5 text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" title="Clear sort order" aria-label="Clear sort order">
+ <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ )}
  </div>
  )}
-
- {/* ── Status tab ── */}
- {activeFilterTab === 'status' && navItem.hasSet && navItem.hasValidityDates && navItem.setSchemaProps && (() => {
- const statusKeys = ['actives', 'pendings', 'expireds'].filter((k) => k in navItem.setSchemaProps)
- const visKeys = ['publics', 'protecteds', 'privates'].filter((k) => k in navItem.setSchemaProps)
- const activeStatusKeys = collectSetKeysFromExpr(filterBuilderExpr, statusKeys)
- if (!statusKeys.length) return null
- return (
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Status</p>
- <div className="flex items-center gap-3">
- <button type="button" onClick={() => { setPage(0); setFilterBuilderExpr((prev) => { const selVis = collectSetKeysFromExpr(prev, visKeys); return buildStatusVisibilityExpr(prev, { statusKeys, selectedStatusKeys: statusKeys, visibilityKeys: visKeys, selectedVisibilityKeys: selVis, setSchemaProps: navItem.setSchemaProps }) }) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">All</button>
- <button type="button" onClick={() => { setPage(0); setFilterBuilderExpr((prev) => { const selVis = collectSetKeysFromExpr(prev, visKeys); return buildStatusVisibilityExpr(prev, { statusKeys, selectedStatusKeys: [], visibilityKeys: visKeys, selectedVisibilityKeys: selVis, setSchemaProps: navItem.setSchemaProps }) }) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">None</button>
- </div>
- </div>
- <div className="flex flex-wrap gap-3">
- {statusKeys.map((key) => {
- const checked = activeStatusKeys.includes(key)
- return (
- <label key={key} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 px-2 py-1 group">
- <input type="checkbox" checked={checked} onChange={() => { setPage(0); setFilterBuilderExpr((prev) => { const prevSK = collectSetKeysFromExpr(prev, statusKeys); const selVis = collectSetKeysFromExpr(prev, visKeys); const nextSK = prevSK.includes(key) ? prevSK.filter((k) => k !== key) : [...prevSK, key]; return buildStatusVisibilityExpr(prev, { statusKeys, selectedStatusKeys: nextSK, visibilityKeys: visKeys, selectedVisibilityKeys: selVis, setSchemaProps: navItem.setSchemaProps }) }) }} className="w-3.5 h-3.5 accent-blue-500 cursor-pointer shrink-0" />
- <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white">{formatSetChoiceLabel(key)}</span>
- </label>
- )
- })}
- </div>
- </div>
- )
- })()}
-
- {/* ── Visibility tab ── */}
- {activeFilterTab === 'visibility' && navItem.hasSet && navItem.setSchemaProps && (() => {
- const statusKeys = ['actives', 'pendings', 'expireds'].filter((k) => k in navItem.setSchemaProps)
- const visKeys = ['publics', 'protecteds', 'privates'].filter((k) => k in navItem.setSchemaProps)
- const activeVisKeys = collectSetKeysFromExpr(filterBuilderExpr, visKeys)
- if (!visKeys.length) return null
- return (
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Visibility</p>
- <div className="flex items-center gap-3">
- <button type="button" onClick={() => { setPage(0); setFilterBuilderExpr((prev) => { const selStatus = collectSetKeysFromExpr(prev, statusKeys); return buildStatusVisibilityExpr(prev, { statusKeys, selectedStatusKeys: selStatus, visibilityKeys: visKeys, selectedVisibilityKeys: visKeys, setSchemaProps: navItem.setSchemaProps }) }) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">All</button>
- <button type="button" onClick={() => { setPage(0); setFilterBuilderExpr((prev) => { const selStatus = collectSetKeysFromExpr(prev, statusKeys); return buildStatusVisibilityExpr(prev, { statusKeys, selectedStatusKeys: selStatus, visibilityKeys: visKeys, selectedVisibilityKeys: [], setSchemaProps: navItem.setSchemaProps }) }) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">None</button>
- </div>
- </div>
- <div className="flex flex-wrap gap-3">
- {visKeys.map((key) => {
- const checked = activeVisKeys.includes(key)
- return (
- <label key={key} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 px-2 py-1 group">
- <input type="checkbox" checked={checked} onChange={() => { setPage(0); setFilterBuilderExpr((prev) => { const prevVK = collectSetKeysFromExpr(prev, visKeys); const selStatus = collectSetKeysFromExpr(prev, statusKeys); const nextVK = prevVK.includes(key) ? prevVK.filter((k) => k !== key) : [...prevVK, key]; return buildStatusVisibilityExpr(prev, { statusKeys, selectedStatusKeys: selStatus, visibilityKeys: visKeys, selectedVisibilityKeys: nextVK, setSchemaProps: navItem.setSchemaProps }) }) }} className="w-3.5 h-3.5 accent-blue-500 cursor-pointer shrink-0" />
- <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white">{formatSetChoiceLabel(key)}</span>
- </label>
- )
- })}
- </div>
- </div>
- )
- })()}
 
  {/* ── Field Retrieval tab ── */}
  {activeFilterTab === 'fieldRetrieval' && showFieldSelector && (() => {
@@ -2124,8 +2237,7 @@ export default function ResourcePage() {
  const filteredFields = fieldSearch ? availableFields.filter((f) => f.toLowerCase().includes(fieldSearch.toLowerCase())) : availableFields
  return (
  <div className="space-y-3">
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Field Retrieval — <span className={fieldSelectorState.mode === 'all' ? 'text-gray-400 dark:text-slate-500' : 'text-blue-500 dark:text-blue-300'}>{fieldSelectorState.mode === 'all' ? 'All fields' : checkedCount === 0 ? 'No fields' : `${checkedCount} field${checkedCount !== 1 ? 's' : ''}`}</span></p>
+ <div className="flex items-center justify-end">
  <div className="flex items-center gap-3">
  <button onClick={() => setFieldSelectorState({ mode: 'all', selected: new Set() })} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">All</button>
  <button onClick={() => { setFieldSelectorState({ mode: 'none', selected: new Set() }); setHiddenFields(new Set()) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">None</button>
@@ -2161,8 +2273,7 @@ export default function ResourcePage() {
  const filteredRetrievedFields = hiddenSearch ? retrievedFields.filter((field) => field.toLowerCase().includes(hiddenSearch)) : retrievedFields
  return (
  <div className="space-y-3" ref={hiddenFieldDropdownRef}>
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider font-medium">Field Display — <span className={hiddenRetrievedCount > 0 ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-slate-500'}>{hiddenRetrievedCount === 0 ? 'No hidden fields' : `${hiddenRetrievedCount} hidden`}</span></p>
+ <div className="flex items-center justify-end">
  <div className="flex items-center gap-3">
  <button onClick={() => setHiddenFields(new Set(retrievedFields))} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">Hide all</button>
  <button onClick={() => setHiddenFields(new Set())} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">Show all</button>

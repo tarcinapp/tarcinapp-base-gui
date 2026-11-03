@@ -106,26 +106,24 @@ function wrapInParens(tokens, fromIdx, toIdx) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function VisualFilterBuilder({ expr, onChange }) {
- const tokens = useMemo(() => exprToTokens(expr), [expr])
+export default function VisualFilterBuilder({ expr, onChange, inline = false }) {
+  const tokens = useMemo(() => exprToTokens(expr), [expr])
 
- if (!expr || tokens.length === 0) return null
+  if (!expr || tokens.length === 0) return null
 
- function handleRemoveSet(index) {
- const next = removeSetToken(tokens, index)
- onChange(tokensToExpr(next))
- }
+  function handleRemoveSet(index) {
+    const next = removeSetToken(tokens, index)
+    onChange(tokensToExpr(next))
+  }
 
- function handleToggleOp(index) {
- const next = toggleOpToken(tokens, index)
- onChange(tokensToExpr(next))
- }
+  function handleToggleOp(index) {
+    const next = toggleOpToken(tokens, index)
+    onChange(tokensToExpr(next))
+  }
 
- return (
- <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
- <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">sets</span>
- <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
- {tokens.map((token, i) => {
+  const content = (
+    <>
+    {tokens.map((token, i) => {
  if (token.type === 'set') {
  const setLabel = formatSetLabel(token.key)
  return (
@@ -181,7 +179,7 @@ export default function VisualFilterBuilder({ expr, onChange }) {
  return null
  })}
 
- {/* Clear entire expression */}
+ {!inline && (
  <button
  type="button"
  onClick={() => onChange(null)}
@@ -190,9 +188,20 @@ export default function VisualFilterBuilder({ expr, onChange }) {
  aria-label="Clear filter expression"
  >
  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
  </svg>
  </button>
- </div>
+ )}
+ </>
+ )
+
+ if (inline) return content
+
+ return (
+   <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
+   <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">sets</span>
+   <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
+   {content}
+   </div>
  )
 }
