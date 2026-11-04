@@ -38,49 +38,24 @@ function shortId(id) {
  * 'none' – all unchecked, no params
  * 'include' – some re-checked after none, send filter[fields][x]=true for included
  */
-function toggleFieldSelection(fieldName, allFields, current) {
- const { mode, selected } = current
-
- if (mode === 'all') {
- return { mode: 'exclude', selected: new Set([fieldName]) }
+/**
+ * Derive a legacy-compatible { mode, selected } fieldSelectorState from
+ * the new per-field entries array so that all downstream consumers
+ * (columns, hiddenFields pruning, fieldDisplay, hasValidityDates) work unchanged.
+ *
+ * entries: Array<{ id, field, mode: 'ONLY'|'EXCEPT' }>
+ *
+ * - If any entry has mode 'ONLY'  → { mode: 'include', selected: Set(only-fields) }
+ * - If entries are all 'EXCEPT'   → { mode: 'exclude', selected: Set(except-fields) }
+ * - If no entries                 → { mode: 'all',     selected: new Set() }
+ */
+function deriveFieldSelectorState(entries) {
+ if (!entries || entries.length === 0) return { mode: 'all', selected: new Set() }
+ const hasOnly = entries.some((e) => e.mode === 'ONLY')
+ if (hasOnly) {
+ return { mode: 'include', selected: new Set(entries.filter((e) => e.mode === 'ONLY').map((e) => e.field)) }
  }
-
- if (mode === 'exclude') {
- const isChecked = !selected.has(fieldName)
- if (isChecked) {
- // unchecking → add to excludes
- const next = new Set(selected)
- next.add(fieldName)
- return next.size === allFields.length
- ? { mode: 'none', selected: new Set() }
- : { mode: 'exclude', selected: next }
- } else {
- // re-checking → remove from excludes
- const next = new Set(selected)
- next.delete(fieldName)
- return next.size === 0
- ? { mode: 'all', selected: new Set() }
- : { mode: 'exclude', selected: next }
- }
- }
-
- if (mode === 'none') {
- return { mode: 'include', selected: new Set([fieldName]) }
- }
-
- // mode === 'include'
- const isChecked = selected.has(fieldName)
- if (isChecked) {
- const next = new Set(selected)
- next.delete(fieldName)
- return next.size === 0
- ? { mode: 'none', selected: new Set() }
- : { mode: 'include', selected: next }
- } else {
- const next = new Set(selected)
- next.add(fieldName)
- return { mode: 'include', selected: next }
- }
+ return { mode: 'exclude', selected: new Set(entries.map((e) => e.field)) }
 }
 
 function isFieldChecked(fieldName, fieldSelectorState) {
@@ -91,12 +66,19 @@ function isFieldChecked(fieldName, fieldSelectorState) {
  return selected.has(fieldName) // 'include'
 }
 
-function buildFilterFieldsParams(qs, fieldSelectorState) {
- const { mode, selected } = fieldSelectorState
- if (mode === 'exclude') {
- for (const f of selected) qs.set(`filter[fields][${f}]`, 'false')
- } else if (mode === 'include') {
- for (const f of selected) qs.set(`filter[fields][${f}]`, 'true')
+function buildFilterFieldsParams(qs, entries) {
+ if (!entries || entries.length === 0) return
+ const hasOnly = entries.some((e) => e.mode === 'ONLY')
+ if (hasOnly) {
+ // include-only semantics: emit true for ONLY entries
+ for (const e of entries) {
+  if (e.mode === 'ONLY') qs.set(`filter[fields][${e.field}]`, 'true')
+ }
+ } else {
+ // exclude semantics: emit false for EXCEPT entries
+ for (const e of entries) {
+  qs.set(`filter[fields][${e.field}]`, 'false')
+ }
  }
 }
 
@@ -127,7 +109,7 @@ const WHERE_OP_SECOND_VALUE = new Set(
  WHERE_OPERATOR_OPTIONS.filter((o) => o.needsSecondValue).map((o) => o.value)
 )
 
-const RESOURCE_FIELD_PREFS_SESSION_KEY = 'resourceFieldPrefs.v1'
+const RESOURCE_FIELD_PREFS_SESSION_KEY = 'resourceFieldPrefs.v2'
 
 function loadResourceFieldPrefs(resourceKey) {
  if (!resourceKey) return null
@@ -138,14 +120,17 @@ function loadResourceFieldPrefs(resourceKey) {
  const entry = parsed?.[resourceKey]
  if (!entry) return null
 
- const mode = ['all', 'exclude', 'none', 'include'].includes(entry.mode) ? entry.mode : 'all'
- const selected = Array.isArray(entry.selected) ? new Set(entry.selected) : new Set()
+ const fieldRetrievalEntries = Array.isArray(entry.fieldRetrievalEntries)
+ ? entry.fieldRetrievalEntries.filter(
+  (e) => e && typeof e.field === 'string' && (e.mode === 'ONLY' || e.mode === 'EXCEPT')
+ )
+ : []
  const hidden = Array.isArray(entry.hidden) ? new Set(entry.hidden) : new Set()
  const hiddenRecordIds = Array.isArray(entry.hiddenRecordIds) ? new Set(entry.hiddenRecordIds) : new Set()
  const hiddenRecordMeta = entry.hiddenRecordMeta && typeof entry.hiddenRecordMeta === 'object' ? entry.hiddenRecordMeta : {}
  const hideMarkedRows = entry.hideMarkedRows !== false
  return {
- fieldSelectorState: { mode, selected },
+ fieldRetrievalEntries,
  hiddenFields: hidden,
  hiddenRecordIds,
  hiddenRecordMeta,
@@ -156,14 +141,13 @@ function loadResourceFieldPrefs(resourceKey) {
  }
 }
 
-function saveResourceFieldPrefs(resourceKey, fieldSelectorState, hiddenFields, hiddenRecordIds, hiddenRecordMeta, hideMarkedRows) {
+function saveResourceFieldPrefs(resourceKey, fieldRetrievalEntries, hiddenFields, hiddenRecordIds, hiddenRecordMeta, hideMarkedRows) {
  if (!resourceKey) return
  try {
  const raw = window.sessionStorage.getItem(RESOURCE_FIELD_PREFS_SESSION_KEY)
  const parsed = raw ? JSON.parse(raw) : {}
  parsed[resourceKey] = {
- mode: fieldSelectorState.mode,
- selected: [...fieldSelectorState.selected],
+ fieldRetrievalEntries,
  hidden: [...hiddenFields],
  hiddenRecordIds: [...hiddenRecordIds],
  hiddenRecordMeta,
@@ -605,8 +589,9 @@ export default function ResourcePage() {
  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
  // activeFilterTab: null | 'sets' | 'where' | 'sort' | 'status' | 'visibility' | 'fieldRetrieval' | 'fieldDisplay'
  const [activeFilterTab, setActiveFilterTab] = useState(null)
- // fieldSelectorState: { mode: 'all'|'exclude'|'none'|'include', selected: Set<string> }
- const [fieldSelectorState, setFieldSelectorState] = useState({ mode: 'all', selected: new Set() })
+ // fieldRetrievalEntries: Array<{ id: string, field: string, mode: 'ONLY'|'EXCEPT' }>
+ // Replaces the old fieldSelectorState. A derived fieldSelectorState is computed via useMemo.
+ const [fieldRetrievalEntries, setFieldRetrievalEntries] = useState([])
  // sortOrder: [{ field: string, dir: 'ASC'|'DESC' }] — applied; stagedSortOrder: staged in panel
  const [sortOrder, setSortOrder] = useState([])
  const [stagedSortOrder, setStagedSortOrder] = useState([])
@@ -625,6 +610,7 @@ export default function ResourcePage() {
  const [sortFieldDropdownOpen, setSortFieldDropdownOpen] = useState(false)
  const [sortFieldSearch, setSortFieldSearch] = useState('')
  const [sortFieldHighlight, setSortFieldHighlight] = useState(-1)
+ const [fieldPickerHighlight, setFieldPickerHighlight] = useState(-1)
  const [whereClauseOpen, setWhereClauseOpen] = useState(false)
  const [whereFieldSearch, setWhereFieldSearch] = useState('')
  const [whereFieldHighlight, setWhereFieldHighlight] = useState(-1)
@@ -637,6 +623,7 @@ export default function ResourcePage() {
  const hiddenFieldDropdownRef = useRef(null)
  const sortFieldDropdownRef = useRef(null)
  const sortFieldListRef = useRef(null)
+ const fieldPickerListRef = useRef(null)
  const whereClausePanelRef = useRef(null)
  const whereFieldListRef = useRef(null)
  const isResizing = useRef(false)
@@ -663,6 +650,9 @@ export default function ResourcePage() {
  const [listRelateError, setListRelateError] = useState(null)
  const listRelateSearchDebounceRef = useRef(null)
  const [traversalRefreshSignal, setTraversalRefreshSignal] = useState(0)
+
+ // Derived legacy-compatible state for all downstream consumers (columns, fieldDisplay, etc.)
+ const fieldSelectorState = useMemo(() => deriveFieldSelectorState(fieldRetrievalEntries), [fieldRetrievalEntries])
 
  const { navItems } = useMemo(() => parseOasSpec(oasSpec), [oasSpec])
  const navItem = useMemo(() => navItems.find((n) => n.id === tagSlug), [navItems, tagSlug])
@@ -819,10 +809,10 @@ export default function ResourcePage() {
  }
  if (selectedQ) qs.set('q', selectedQ)
  if (selectedFieldset) qs.set('fieldset', selectedFieldset)
- buildFilterFieldsParams(qs, fieldSelectorState)
+ buildFilterFieldsParams(qs, fieldRetrievalEntries)
  buildFilterOrderParams(qs, sortOrder)
  return formatQueryPreview(qs)
- }, [page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldSelectorState, sortOrder])
+ }, [page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldRetrievalEntries, sortOrder])
 
  useEffect(() => {
  setPage(0)
@@ -830,13 +820,13 @@ export default function ResourcePage() {
  setDebouncedSearch('')
  const savedPrefs = loadResourceFieldPrefs(resourcePrefsKey)
  if (savedPrefs) {
- setFieldSelectorState(savedPrefs.fieldSelectorState)
+ setFieldRetrievalEntries(savedPrefs.fieldRetrievalEntries)
  setHiddenFields(savedPrefs.hiddenFields)
  setHiddenRecordIds(savedPrefs.hiddenRecordIds ?? new Set())
  setHiddenRecordMeta(savedPrefs.hiddenRecordMeta ?? {})
  setHideMarkedRows(savedPrefs.hideMarkedRows ?? true)
  } else {
- setFieldSelectorState({ mode: 'all', selected: new Set() })
+ setFieldRetrievalEntries([])
  setHiddenFields(new Set())
  setHiddenRecordIds(new Set())
  setHiddenRecordMeta({})
@@ -856,8 +846,8 @@ export default function ResourcePage() {
 
  useEffect(() => {
  if (!resourcePrefsKey) return
- saveResourceFieldPrefs(resourcePrefsKey, fieldSelectorState, hiddenFields, hiddenRecordIds, hiddenRecordMeta, hideMarkedRows)
- }, [resourcePrefsKey, fieldSelectorState, hiddenFields, hiddenRecordIds, hiddenRecordMeta, hideMarkedRows])
+ saveResourceFieldPrefs(resourcePrefsKey, fieldRetrievalEntries, hiddenFields, hiddenRecordIds, hiddenRecordMeta, hideMarkedRows)
+ }, [resourcePrefsKey, fieldRetrievalEntries, hiddenFields, hiddenRecordIds, hiddenRecordMeta, hideMarkedRows])
 
  useEffect(() => {
  if (!qDropdownOpen) return undefined
@@ -947,6 +937,12 @@ export default function ResourcePage() {
  }, [whereFieldHighlight])
 
  useEffect(() => {
+ if (fieldPickerHighlight < 0 || !fieldPickerListRef.current) return
+ const el = fieldPickerListRef.current.querySelector(`[data-field-idx="${fieldPickerHighlight}"]`)
+ if (el) el.scrollIntoView({ block: 'nearest' })
+ }, [fieldPickerHighlight])
+
+ useEffect(() => {
  if (!toastError) return undefined
 
  const timeoutId = window.setTimeout(() => {
@@ -1031,7 +1027,7 @@ export default function ResourcePage() {
  }
  if (selectedQ) qs.set('q', selectedQ)
  if (selectedFieldset) qs.set('fieldset', selectedFieldset)
- buildFilterFieldsParams(qs, fieldSelectorState)
+ buildFilterFieldsParams(qs, fieldRetrievalEntries)
  buildFilterOrderParams(qs, sortOrder)
 
  const start = performance.now()
@@ -1041,7 +1037,7 @@ export default function ResourcePage() {
  setResponseStatus(status)
  setRequestHeaders(reqHeaders ?? null)
  return data ?? []
- }, [getWithMeta, navItem?.collectionPath, page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldSelectorState, sortOrder])
+ }, [getWithMeta, navItem?.collectionPath, page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldRetrievalEntries, sortOrder])
 
  const { data, loading, error, refresh } = useResourceList(fetcher)
 
@@ -1354,20 +1350,26 @@ export default function ResourcePage() {
  }, [])
 
  const handleDeselectFieldFromColumn = useCallback((fieldKey) => {
- setFieldSelectorState((prev) => {
- if (!availableFields.includes(fieldKey)) return prev
- if (!isFieldChecked(fieldKey, prev)) return prev
- const next = toggleFieldSelection(fieldKey, availableFields, prev)
+ if (!availableFields.includes(fieldKey)) return
+ if (!isFieldChecked(fieldKey, fieldSelectorState)) return
+ setFieldRetrievalEntries((prev) => {
+ const hasOnly = prev.some((e) => e.mode === 'ONLY')
+ if (hasOnly) {
+  // In include-only mode: remove this field from ONLY entries
+  return prev.filter((e) => e.field !== fieldKey)
+ }
+ // In exclude or empty mode: add as EXCEPT (if not already present)
+ if (prev.some((e) => e.field === fieldKey)) return prev
+ return [...prev, { id: `fre-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, field: fieldKey, mode: 'EXCEPT' }]
+ })
  setHiddenFields((hiddenPrev) => {
  if (!hiddenPrev.has(fieldKey)) return hiddenPrev
  const hiddenNext = new Set(hiddenPrev)
  hiddenNext.delete(fieldKey)
  return hiddenNext
  })
- return next
- })
  setPage(0)
- }, [availableFields])
+ }, [availableFields, fieldSelectorState])
 
  const handleHideFieldFromColumn = useCallback((fieldKey) => {
  if (!isFieldChecked(fieldKey, fieldSelectorState)) return
@@ -1652,7 +1654,7 @@ export default function ResourcePage() {
  selectedFieldset !== null,
  filterBuilderExpr !== null,
  whereBuilderExpr !== null,
- fieldSelectorState.mode !== 'all',
+ fieldRetrievalEntries.length > 0,
  hiddenFields.size > 0,
  hiddenRecordIds.size > 0,
  sortOrder.length > 0,
@@ -1699,7 +1701,7 @@ export default function ResourcePage() {
  if (id === 'sets') return filterBuilderExpr !== null
  if (id === 'where') return whereBuilderExpr !== null
  if (id === 'sort') return sortOrder.length > 0
- if (id === 'fieldRetrieval') return fieldSelectorState.mode !== 'all'
+ if (id === 'fieldRetrieval') return fieldRetrievalEntries.length > 0
  if (id === 'fieldDisplay') return hiddenFields.size > 0
  return false
  }
@@ -1750,7 +1752,7 @@ export default function ResourcePage() {
  {showFieldSelector && (
  <button
  type="button"
- onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setStagedSortOrder([]); setFieldSelectorState({ mode: 'all', selected: new Set() }); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setHiddenFields(new Set()); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setPage(0) }}
+ onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setStagedSortOrder([]); setFieldRetrievalEntries([]); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setHiddenFields(new Set()); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setPage(0) }}
  className="relative flex items-center gap-1.5 h-9 px-3 text-xs whitespace-nowrap border-r border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-300"
  title="Clear all filters and display settings"
  >
@@ -2233,34 +2235,109 @@ export default function ResourcePage() {
 
  {/* ── Field Retrieval tab ── */}
  {activeFilterTab === 'fieldRetrieval' && showFieldSelector && (() => {
- const checkedCount = fieldSelectorState.mode === 'all' ? availableFields.length : fieldSelectorState.mode === 'none' ? 0 : fieldSelectorState.mode === 'include' ? fieldSelectorState.selected.size : availableFields.length - fieldSelectorState.selected.size
- const filteredFields = fieldSearch ? availableFields.filter((f) => f.toLowerCase().includes(fieldSearch.toLowerCase())) : availableFields
+ const alreadyAddedFields = new Set(fieldRetrievalEntries.map((e) => e.field))
+ const filteredPickerFields = fieldSearch
+ ? availableFields.filter((f) => f.toLowerCase().includes(fieldSearch.toLowerCase()))
+ : availableFields
+ const fieldKeyDown = (e) => {
+ const navigable = filteredPickerFields.reduce((acc, f, i) => { if (!alreadyAddedFields.has(f)) acc.push(i); return acc }, [])
+ if (e.key === 'ArrowDown') { e.preventDefault(); setFieldPickerHighlight((prev) => { const cur = navigable.indexOf(prev); return navigable[cur + 1] ?? navigable[0] ?? -1 }) }
+ else if (e.key === 'ArrowUp') { e.preventDefault(); setFieldPickerHighlight((prev) => { const cur = navigable.indexOf(prev); return navigable[cur - 1] ?? navigable[navigable.length - 1] ?? -1 }) }
+ else if (e.key === 'Enter') {
+ e.preventDefault()
+ const f = filteredPickerFields[fieldPickerHighlight]
+ if (f && !alreadyAddedFields.has(f)) {
+ setFieldRetrievalEntries((prev) => [...prev, { id: `fre-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, field: f, mode: 'EXCEPT' }])
+ setFieldDropdownOpen(false); setFieldSearch(''); setFieldPickerHighlight(-1)
+ }
+ }
+ else if (e.key === 'Escape') { setFieldDropdownOpen(false); setFieldSearch(''); setFieldPickerHighlight(-1) }
+ }
+ // Derive a single global mode from entries: if any entry is ONLY → 'ONLY', else 'EXCEPT'
+ const globalMode = fieldRetrievalEntries.some((e) => e.mode === 'ONLY') ? 'ONLY' : 'EXCEPT'
+ const toggleGlobalMode = () => {
+ const nextMode = globalMode === 'EXCEPT' ? 'ONLY' : 'EXCEPT'
+ setFieldRetrievalEntries((prev) => prev.map((e) => ({ ...e, mode: nextMode })))
+ }
  return (
- <div className="space-y-3">
- <div className="flex items-center justify-end">
- <div className="flex items-center gap-3">
- <button onClick={() => setFieldSelectorState({ mode: 'all', selected: new Set() })} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">All</button>
- <button onClick={() => { setFieldSelectorState({ mode: 'none', selected: new Set() }); setHiddenFields(new Set()) }} className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 underline">None</button>
+ <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700/60 min-h-[38px]">
+ {/* Static label */}
+ <span className="text-[10px] text-gray-300 dark:text-slate-600 font-mono uppercase tracking-wider shrink-0">Fields</span>
+ <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0">›</span>
+ {/* Single global mode chip — shown only when at least one field is present */}
+ {fieldRetrievalEntries.length > 0 && (
+ <button
+ type="button"
+ onClick={toggleGlobalMode}
+ title={globalMode === 'EXCEPT' ? 'Click to switch to ONLY (include these fields)' : 'Click to switch to EXCEPT (exclude these fields)'}
+ className={`px-1.5 py-0.5 text-[10px] font-bold font-mono uppercase border transition-colors ${
+ globalMode === 'ONLY'
+ ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/40'
+ : 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800/40'
+ }`}
+ >
+ {globalMode}
+ </button>
+ )}
+ {/* Field chips */}
+ {fieldRetrievalEntries.map((entry) => (
+ <span key={entry.id} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 border text-xs font-mono bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300">
+ {entry.field}
+ <button
+ type="button"
+ onClick={() => {
+ setFieldRetrievalEntries((prev) => {
+ const wasChecked = isFieldChecked(entry.field, fieldSelectorState)
+ const next = prev.filter((e) => e.id !== entry.id)
+ if (wasChecked && !isFieldChecked(entry.field, deriveFieldSelectorState(next))) {
+ setHiddenFields((hp) => { if (!hp.has(entry.field)) return hp; const hn = new Set(hp); hn.delete(entry.field); return hn })
+ }
+ return next
+ })
+ }}
+ className="opacity-50 hover:opacity-100 transition-opacity ml-0.5"
+ aria-label={`Remove ${entry.field}`}
+ >
+ <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ </span>
+ ))}
+ {/* Single "Add Field" button with dropdown */}
+ <span className="relative inline-flex items-center" ref={fieldDropdownRef}>
+ <button type="button" onClick={() => { setFieldDropdownOpen((v) => v ? false : 'add'); setFieldSearch(''); setFieldPickerHighlight(-1) }} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors">
+ <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+ Add Field
+ </button>
+ {fieldDropdownOpen === 'add' && (
+ <div className="absolute left-0 top-full mt-1 z-20 w-[200px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl">
+ <div className="px-2 py-1.5 border-b border-gray-200 dark:border-slate-700">
+ <input type="text" autoFocus value={fieldSearch} onChange={(e) => { setFieldSearch(e.target.value); setFieldPickerHighlight(-1) }} onKeyDown={fieldKeyDown} placeholder="Search fields…" className="w-full h-[24px] px-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
  </div>
- </div>
- <div className="relative" ref={fieldDropdownRef}>
- <div className="relative border-b border-gray-200 dark:border-slate-700 mb-2">
- <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" /></svg>
- <input type="text" value={fieldSearch} onChange={(e) => setFieldSearch(e.target.value)} placeholder="Filter fields…" className="w-full max-w-xs pl-7 pr-7 py-1.5 text-xs bg-transparent text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none" />
- {fieldSearch && (<button onClick={() => setFieldSearch('')} className="absolute left-[calc(theme(spacing.7)+0.5rem+16ch)] top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300" aria-label="Clear search"><svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>)}
- </div>
- <div className="flex flex-wrap gap-x-4 gap-y-0.5 max-h-52 overflow-y-auto">
- {availableFields.length === 0 ? (<p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No fields found.</p>) : filteredFields.length === 0 ? (<p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No match for &ldquo;{fieldSearch}&rdquo;.</p>) : filteredFields.map((field) => {
- const checked = isFieldChecked(field, fieldSelectorState)
+ <div ref={fieldPickerListRef} className="overflow-y-auto max-h-[180px] py-1">
+ {filteredPickerFields.length === 0
+ ? <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-500">No match.</p>
+ : filteredPickerFields.map((f, idx) => {
+ const alreadyAdded = alreadyAddedFields.has(f)
+ const isHighlighted = idx === fieldPickerHighlight
  return (
- <label key={field} className="flex items-center gap-2 px-1 py-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 group">
- <input type="checkbox" checked={checked} onChange={() => { setFieldSelectorState((prev) => { const wasChecked = isFieldChecked(field, prev); const next = toggleFieldSelection(field, availableFields, prev); const isCheckedNext = isFieldChecked(field, next); if (wasChecked && !isCheckedNext) { setHiddenFields((hiddenPrev) => { if (!hiddenPrev.has(field)) return hiddenPrev; const hiddenNext = new Set(hiddenPrev); hiddenNext.delete(field); return hiddenNext }) } return next }) }} className="w-3.5 h-3.5 accent-blue-500 cursor-pointer shrink-0" />
- <span className="text-xs font-mono text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white">{field}</span>
- </label>
+ <button key={f} type="button" data-field-idx={idx} disabled={alreadyAdded} onClick={() => {
+ setFieldRetrievalEntries((prev) => [...prev, { id: `fre-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, field: f, mode: 'EXCEPT' }])
+ setFieldDropdownOpen(false); setFieldSearch(''); setFieldPickerHighlight(-1)
+ }} onMouseEnter={() => { if (!alreadyAdded) setFieldPickerHighlight(idx) }} className={`w-full text-left px-3 py-1.5 text-xs font-mono transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isHighlighted ? 'bg-blue-50 dark:bg-blue-900/30 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'}`}>
+ {f}
+ </button>
  )
  })}
  </div>
  </div>
+ )}
+ </span>
+ {/* Reset — far right */}
+ {fieldRetrievalEntries.length > 0 && (
+ <button type="button" onClick={() => { setFieldRetrievalEntries([]); setPage(0) }} className="ml-auto flex items-center justify-center w-5 h-5 text-gray-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" title="Reset field retrieval" aria-label="Reset field retrieval">
+ <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ )}
  </div>
  )
  })()}
