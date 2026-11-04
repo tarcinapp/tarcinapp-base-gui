@@ -590,8 +590,16 @@ export default function ResourcePage() {
  const [createFormValues, setCreateFormValues] = useState({})
  const [toastError, setToastError] = useState(null)
  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
- // activeFilterTab: null | 'sets' | 'where' | 'sort' | 'status' | 'visibility' | 'fieldRetrieval' | 'fieldDisplay'
+ // activeFilterTab: null | 'sets' | 'where' | 'sort' | 'status' | 'visibility' | 'fieldRetrieval' | 'fieldDisplay' | 'query'
  const [activeFilterTab, setActiveFilterTab] = useState(null)
+ // customQueryParams: Array<{ id: string, key: string, value: string }>
+ const [customQueryParams, setCustomQueryParams] = useState([])
+ const [queryPanelOpen, setQueryPanelOpen] = useState(false)
+ // staged inputs for the "Add Query" panel
+ const [stagedQueryKey, setStagedQueryKey] = useState('')
+ const [stagedQueryValue, setStagedQueryValue] = useState('')
+ const [stagedQueryRaw, setStagedQueryRaw] = useState('')
+ const [queryInputMode, setQueryInputMode] = useState('kv') // 'kv' | 'raw'
  // fieldRetrievalEntries: Array<{ id: string, field: string, mode: 'ONLY'|'EXCEPT' }>
  // Replaces the old fieldSelectorState. A derived fieldSelectorState is computed via useMemo.
  const [fieldRetrievalEntries, setFieldRetrievalEntries] = useState([])
@@ -618,6 +626,7 @@ export default function ResourcePage() {
  const [whereFieldSearch, setWhereFieldSearch] = useState('')
  const [whereFieldHighlight, setWhereFieldHighlight] = useState(-1)
  const [tabDropdownOpen, setTabDropdownOpen] = useState(false)
+ const queryPanelRef = useRef(null)
  const tabDropdownRef = useRef(null)
  const qDropdownRef = useRef(null)
  const fieldsetDropdownRef = useRef(null)
@@ -819,8 +828,9 @@ export default function ResourcePage() {
  if (selectedFieldset) qs.set('fieldset', selectedFieldset)
  buildFilterFieldsParams(qs, fieldRetrievalEntries)
  buildFilterOrderParams(qs, sortOrder)
+ for (const p of customQueryParams) { if (p.key.trim()) qs.append(p.key.trim(), p.value) }
  return formatQueryPreview(qs)
- }, [page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldRetrievalEntries, sortOrder])
+ }, [page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldRetrievalEntries, sortOrder, customQueryParams])
 
  useEffect(() => {
  setPage(0)
@@ -852,6 +862,7 @@ export default function ResourcePage() {
  setWhereInternalOp('and')
  setStagedSetKeys([])
  setStagedSetMeta({})
+ setCustomQueryParams([])
  }, [resourcePrefsKey])
 
  useEffect(() => {
@@ -939,6 +950,13 @@ export default function ResourcePage() {
  document.addEventListener('mousedown', handler)
  return () => document.removeEventListener('mousedown', handler)
  }, [whereClauseOpen])
+
+ useEffect(() => {
+ if (!queryPanelOpen) return undefined
+ const handler = (e) => { if (queryPanelRef.current && !queryPanelRef.current.contains(e.target)) setQueryPanelOpen(false) }
+ document.addEventListener('mousedown', handler)
+ return () => document.removeEventListener('mousedown', handler)
+ }, [queryPanelOpen])
 
  useEffect(() => {
  if (!tabDropdownOpen) return undefined
@@ -1046,6 +1064,7 @@ export default function ResourcePage() {
  if (selectedFieldset) qs.set('fieldset', selectedFieldset)
  buildFilterFieldsParams(qs, fieldRetrievalEntries)
  buildFilterOrderParams(qs, sortOrder)
+ for (const p of customQueryParams) { if (p.key.trim()) qs.append(p.key.trim(), p.value) }
 
  const start = performance.now()
  const { data, headers, status, requestHeaders: reqHeaders } = await getWithMeta(`${navItem.collectionPath}?${qs.toString()}`)
@@ -1054,7 +1073,7 @@ export default function ResourcePage() {
  setResponseStatus(status)
  setRequestHeaders(reqHeaders ?? null)
  return data ?? []
- }, [getWithMeta, navItem?.collectionPath, page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldRetrievalEntries, sortOrder])
+ }, [getWithMeta, navItem?.collectionPath, page, pageSize, paginationKeys.limitKey, paginationKeys.skipKey, filterBuilderExpr, whereBuilderExpr, debouncedSearch, selectedQ, selectedFieldset, fieldRetrievalEntries, sortOrder, customQueryParams])
 
  const { data, loading, error, refresh } = useResourceList(fetcher)
 
@@ -1551,6 +1570,15 @@ export default function ResourcePage() {
  const selectedCount = selectedRowIds.size
  const bulkProgressPct = bulkProgress.total > 0 ? Math.round((bulkProgress.processed / bulkProgress.total) * 100) : 0
 
+ // Close the advanced-filter panel immediately when the user selects the first row
+ useEffect(() => {
+  if (selectedCount > 0 && filterPanelOpen) {
+   setFilterPanelOpen(false)
+   setActiveFilterTab(null)
+   setTabDropdownOpen(false)
+  }
+ }, [selectedCount]) // eslint-disable-line react-hooks/exhaustive-deps
+
  const hasNextPage = data.length === pageSize
 
  const fullRequestUrl = `${endpoint ?? ''}${navItem?.collectionPath ?? ''}${querySummary}`
@@ -1674,8 +1702,64 @@ export default function ResourcePage() {
  {/* ── Toolbar + filter panel: grouped so no space-y-4 gap between them ── */}
  <div className="relative flex flex-col z-20">
  <div className="flex items-center gap-3">
- {/* Left: advanced filter button group */}
- {(() => {
+ {/* Left: selection action bar — shown only when rows are selected, replaces the filter group */}
+ {selectedCount > 0 && (
+ <div className="inline-flex items-stretch border border-b-0 border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden h-9">
+ <span className="inline-flex items-center px-2.5 text-xs text-gray-700 dark:text-slate-300 font-medium bg-white dark:bg-slate-800">
+ {selectedCount} selected
+ </span>
+ <button
+ type="button"
+ onClick={() => setPendingBulkAction('activate')}
+ disabled={!canActivate || bulkProgress.running}
+ className="px-2.5 text-xs text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+ title={canActivate ? 'Activate selected records' : 'Activate is not supported on this resource'}
+ >
+ Activate
+ </button>
+ <button
+ type="button"
+ onClick={() => setPendingBulkAction('deactivate')}
+ disabled={!canDeactivate || bulkProgress.running}
+ className="px-2.5 text-xs text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+ title={canDeactivate ? 'Deactivate selected records' : 'Deactivate is not supported on this resource'}
+ >
+ Deactivate
+ </button>
+ <button
+ type="button"
+ onClick={() => setPendingBulkAction('hide')}
+ disabled={bulkProgress.running}
+ className="px-2.5 text-xs text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+ title="Hide selected records in this UI"
+ >
+ Hide
+ </button>
+ <button
+ type="button"
+ onClick={() => setPendingBulkAction('delete')}
+ disabled={!canDeleteItem || bulkProgress.running}
+ className="px-2.5 text-xs text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+ title={canDeleteItem ? 'Delete selected records' : 'Delete is not supported on this resource'}
+ >
+ Delete
+ </button>
+ <button
+ type="button"
+ onClick={() => setSelectedRowIds(new Set())}
+ disabled={bulkProgress.running}
+ className="flex items-center justify-center w-9 text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-800 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+ title="Clear selection"
+ aria-label="Clear selection"
+ >
+ <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+ <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
+ )}
+ {/* Left: advanced filter button group — hidden when rows are selected */}
+ {selectedCount === 0 && (() => {
  const activeFilterCount = [
  selectedQ !== null,
  selectedFieldset !== null,
@@ -1685,14 +1769,17 @@ export default function ResourcePage() {
  hiddenFields.size > 0,
  hiddenRecordIds.size > 0,
  sortOrder.length > 0,
+ customQueryParams.length > 0,
  ].filter(Boolean).length
  const tabs = [
- ...(navItem.hasSet && navItem.setSchemaProps ? [{ id: 'sets', label: 'Sets' }] : []),
- ...(navItem.hasFilterWhere ? [{ id: 'where', label: 'Where' }] : []),
- ...(navItem.hasFilterOrder ? [{ id: 'sort', label: 'Sort' }] : []),
- ...(showFieldSelector ? [{ id: 'fieldRetrieval', label: 'Field Retrieval' }] : []),
- ...(showFieldSelector ? [{ id: 'fieldDisplay', label: 'Field Display' }] : []),
- ]
+  ...(navItem.hasSet && navItem.setSchemaProps ? [{ id: 'sets', label: 'Sets' }] : []),
+  ...(navItem.hasFilterWhere ? [{ id: 'where', label: 'Where' }] : []),
+  ...(navItem.hasFilterOrder ? [{ id: 'sort', label: 'Sort' }] : []),
+  ...(showFieldSelector ? [{ id: 'fieldRetrieval', label: 'Field Retrieval' }] : []),
+  ...(showFieldSelector ? [{ id: 'fieldDisplay', label: 'Field Display' }] : []),
+  { id: 'itemDisplay', label: 'Item Display' },
+  { id: 'query', label: 'Query' },
+  ]
  // Ensure there is always an active tab when the panel opens
  const effectiveActiveTab = activeFilterTab ?? (tabs.length > 0 ? tabs[0].id : null)
  const activeTabLabel = tabs.find((t) => t.id === effectiveActiveTab)?.label ?? ''
@@ -1765,7 +1852,9 @@ export default function ResourcePage() {
  (tab.id === 'where'          && whereBuilderExpr !== null) ||
  (tab.id === 'sort'           && sortOrder.length > 0) ||
  (tab.id === 'fieldRetrieval' && fieldRetrievalEntries.length > 0) ||
- (tab.id === 'fieldDisplay'   && hiddenFields.size > 0)
+ (tab.id === 'fieldDisplay'   && hiddenFields.size > 0) ||
+ (tab.id === 'itemDisplay'    && hiddenRecordIds.size > 0) ||
+ (tab.id === 'query'          && customQueryParams.length > 0)
  return (
  <button
  key={tab.id}
@@ -2079,6 +2168,57 @@ export default function ResourcePage() {
  setFieldRetrievalEntries((prev) => prev.map((e) => ({ ...e, mode: nextMode })))
  }
  return (<>
+ {navItem.hasFieldset && fieldsetEnumValues && fieldsetEnumValues.length > 0 && (<>
+ {selectedFieldset && (
+ <span className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 border text-xs font-mono bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300">
+ <span className="text-gray-500 dark:text-slate-400">fieldset</span>
+ <span className="text-gray-300 dark:text-slate-600">=</span>
+ <span>{selectedFieldset}</span>
+ <button
+ type="button"
+ onClick={() => { setSelectedFieldset(null); setPage(0) }}
+ className="opacity-50 hover:opacity-100 transition-opacity ml-0.5"
+ aria-label={`Remove fieldset=${selectedFieldset}`}
+ >
+ <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ </span>
+ )}
+ <span className="relative inline-flex items-center" ref={fieldsetDropdownRef}>
+ <button
+ type="button"
+ onClick={() => setFieldsetDropdownOpen((v) => !v)}
+ className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors"
+ >
+ fieldset
+ <svg className="w-2 h-2 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ </button>
+ {fieldsetDropdownOpen && (
+ <div className="absolute left-0 top-full -mt-px z-30 w-[200px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl">
+ <p className="px-3 pt-2 pb-1 text-[10px] text-gray-400 dark:text-slate-500 font-mono uppercase tracking-wider">fieldset</p>
+ <div className="pb-1">
+ {fieldsetEnumValues.map((val) => (
+ <button
+ key={val}
+ type="button"
+ onClick={() => { setSelectedFieldset(val); setFieldsetDropdownOpen(false); setPage(0) }}
+ className={`w-full text-left px-3 py-1.5 text-xs font-mono transition-colors ${
+ selectedFieldset === val
+ ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+ : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'
+ }`}
+ >
+ {val}
+ </button>
+ ))}
+ </div>
+ </div>
+ )}
+ </span>
+ {(fieldRetrievalEntries.length > 0 || selectedFieldset) && (
+ <span className="text-gray-200 dark:text-slate-700 text-xs shrink-0 mx-0.5" aria-hidden="true">|</span>
+ )}
+ </>)}
  {fieldRetrievalEntries.length > 0 && (
  <button
  type="button"
@@ -2280,6 +2420,238 @@ export default function ResourcePage() {
  </>)
  })()}
 
+ {/* ── Item Display tab content ── */}
+ {effectiveActiveTab === 'itemDisplay' && (() => {
+ // Build a lookup map from current page data for tooltip detail resolution
+ const rowById = new Map()
+ for (const row of data) {
+ const id = row?._id ?? row?.id
+ if (id) rowById.set(id, row)
+ }
+ const ids = [...hiddenRecordIds]
+ if (ids.length === 0) {
+ return (
+ <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono italic">
+ No hidden items — select rows and use the Hide action to populate this list.
+ </span>
+ )
+ }
+ return (
+ <>
+ {ids.map((id) => {
+ const row = rowById.get(id) ?? null
+ // Compute status from row data if available (mirrors computeRowStatus in DataGrid)
+ const status = (row && ('_validFromDateTime' in row || '_validUntilDateTime' in row)) ? (() => {
+ const from = row._validFromDateTime ? new Date(row._validFromDateTime) : null
+ const until = row._validUntilDateTime ? new Date(row._validUntilDateTime) : null
+ const now = new Date()
+ if (!from && !until) return 'pending'
+ if (until && until < now) return 'expired'
+ if (from && from > now) return 'pending'
+ return 'active'
+ })() : null
+ const statusColor = { active: '#10b981', pending: '#fbbf24', expired: '#f43f5e' }
+ // Collect tooltip fields from row
+ const tooltipFields = row ? (() => {
+ const unmanaged = Object.entries(row)
+ .filter(([k]) => !k.startsWith('_'))
+ .slice(0, 3)
+ return unmanaged
+ })() : []
+ return (
+ <span key={id} className="relative inline-flex items-center group/itemchip">
+ <span className="inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 border text-xs font-mono bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300">
+ {status && (
+ <span
+ className="flex-shrink-0 w-1.5 h-1.5 rounded-full"
+ style={{ backgroundColor: statusColor[status] }}
+ aria-label={status}
+ />
+ )}
+ <span>{shortId(id)}</span>
+ <button
+ type="button"
+ onClick={() => {
+ setHiddenRecordIds((prev) => { const next = new Set(prev); next.delete(id); return next })
+ setHiddenRecordMeta((prev) => { const next = { ...prev }; delete next[id]; return next })
+ }}
+ className="opacity-50 hover:opacity-100 transition-opacity ml-0.5"
+ aria-label={`Remove item ${shortId(id)} from hidden list`}
+ >
+ <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ </span>
+ {/* Tooltip */}
+ <div className="absolute left-0 top-full mt-1.5 z-40 hidden group-hover/itemchip:block pointer-events-none">
+ <div className="w-56 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl p-2.5 space-y-1.5 text-xs">
+ <div className="flex items-start gap-1.5">
+ <span className="text-gray-400 dark:text-slate-500 font-mono shrink-0 w-10">_id</span>
+ <span className="text-gray-800 dark:text-slate-200 font-mono break-all">{id}</span>
+ </div>
+ {(row?._name !== undefined && row._name !== null) && (
+ <div className="flex items-start gap-1.5">
+ <span className="text-gray-400 dark:text-slate-500 font-mono shrink-0 w-10">_name</span>
+ <span className="text-gray-800 dark:text-slate-200 font-mono break-all">{String(row._name)}</span>
+ </div>
+ )}
+ {(row?._kind !== undefined && row._kind !== null) && (
+ <div className="flex items-start gap-1.5">
+ <span className="text-gray-400 dark:text-slate-500 font-mono shrink-0 w-10">_kind</span>
+ <span className="text-gray-800 dark:text-slate-200 font-mono break-all">{String(row._kind)}</span>
+ </div>
+ )}
+ {tooltipFields.map(([k, v]) => (
+ <div key={k} className="flex items-start gap-1.5">
+ <span className="text-gray-400 dark:text-slate-500 font-mono shrink-0 w-10 truncate" title={k}>{k}</span>
+ <span className="text-gray-800 dark:text-slate-200 font-mono break-all">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+ </div>
+ ))}
+ {!row && (
+ <div className="text-gray-400 dark:text-slate-500 italic">Not on current page</div>
+ )}
+ </div>
+ </div>
+ </span>
+ )
+ })}
+ </>
+ )
+ })()}
+
+ {/* ── Query tab content ── */}
+ {effectiveActiveTab === 'query' && (<>
+ {customQueryParams.map((p) => (
+ <span key={p.id} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 border text-xs font-mono bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300">
+ <span className="text-gray-500 dark:text-slate-400">{p.key}</span>
+ <span className="text-gray-300 dark:text-slate-600">=</span>
+ <span>{p.value}</span>
+ <button
+ type="button"
+ onClick={() => { setCustomQueryParams((prev) => prev.filter((x) => x.id !== p.id)); setPage(0) }}
+ className="opacity-50 hover:opacity-100 transition-opacity ml-0.5"
+ aria-label={`Remove ${p.key}=${p.value}`}
+ >
+ <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ </span>
+ ))}
+ <span className="relative inline-flex items-center" ref={queryPanelRef}>
+ <button
+ type="button"
+ onClick={() => { setQueryPanelOpen((v) => { if (!v) { setStagedQueryKey(''); setStagedQueryValue(''); setStagedQueryRaw(''); setQueryInputMode('kv') } return !v }) }}
+ className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 border text-xs font-mono bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-slate-500 transition-colors"
+ >
+ <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+ Add Query
+ </button>
+ {queryPanelOpen && (() => {
+ const addKvParam = () => {
+ const k = stagedQueryKey.trim()
+ if (!k) return
+ setCustomQueryParams((prev) => [...prev, { id: `qp-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, key: k, value: stagedQueryValue }])
+ setStagedQueryKey(''); setStagedQueryValue(''); setQueryPanelOpen(false); setPage(0)
+ }
+ const addRawParams = () => {
+ const raw = stagedQueryRaw.trim()
+ if (!raw) return
+ const pairs = raw.split('&').map((s) => s.trim()).filter(Boolean)
+ const newParams = pairs.map((pair) => {
+ const eqIdx = pair.indexOf('=')
+ const k = eqIdx === -1 ? pair : pair.slice(0, eqIdx)
+ const v = eqIdx === -1 ? '' : pair.slice(eqIdx + 1)
+ return { id: `qp-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, key: decodeURIComponent(k), value: decodeURIComponent(v) }
+ }).filter((p) => p.key)
+ if (!newParams.length) return
+ setCustomQueryParams((prev) => [...prev, ...newParams])
+ setStagedQueryRaw(''); setQueryPanelOpen(false); setPage(0)
+ }
+ return (
+ <div className="absolute left-0 top-full -mt-px z-30 w-[340px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-xl">
+ {/* Mode switcher */}
+ <div className="flex border-b border-gray-200 dark:border-slate-700">
+ {[{ id: 'kv', label: 'Key / Value' }, { id: 'raw', label: 'Raw string' }].map((m) => (
+ <button
+ key={m.id}
+ type="button"
+ onClick={() => setQueryInputMode(m.id)}
+ className={`flex-1 px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider transition-colors ${queryInputMode === m.id ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+ >
+ {m.label}
+ </button>
+ ))}
+ </div>
+ <div className="p-3 space-y-2">
+ {queryInputMode === 'kv' ? (<>
+ <div className="flex items-center gap-1.5">
+ <input
+ autoFocus
+ type="text"
+ value={stagedQueryKey}
+ onChange={(e) => setStagedQueryKey(e.target.value)}
+ onKeyDown={(e) => { if (e.key === 'Enter') addKvParam() }}
+ placeholder="key"
+ className="w-[120px] flex-shrink-0 h-[26px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+ />
+ <span className="text-gray-400 dark:text-slate-500 font-mono text-xs">=</span>
+ <input
+ type="text"
+ value={stagedQueryValue}
+ onChange={(e) => setStagedQueryValue(e.target.value)}
+ onKeyDown={(e) => { if (e.key === 'Enter') addKvParam() }}
+ placeholder="value"
+ className="flex-1 h-[26px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+ />
+ </div>
+ {qEnumValues && qEnumValues.length > 0 && (
+ <div className="space-y-1.5 pt-1 border-t border-gray-200 dark:border-slate-700">
+ <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">q= presets</p>
+ <div className="flex flex-wrap gap-1">
+ {qEnumValues.map((val) => (
+ <button
+ key={val}
+ type="button"
+ onClick={() => {
+ setCustomQueryParams((prev) => [...prev, { id: `qp-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, key: 'q', value: val }])
+ setQueryPanelOpen(false); setPage(0)
+ }}
+ className="px-2 py-0.5 text-xs font-mono border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+ >
+ {val}
+ </button>
+ ))}
+ </div>
+ </div>
+ )}
+ </>) : (
+ <div>
+ <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono mb-1.5">Paste a query string, e.g. <span className="text-gray-600 dark:text-slate-300">a=b&amp;c=d</span></p>
+ <input
+ autoFocus
+ type="text"
+ value={stagedQueryRaw}
+ onChange={(e) => setStagedQueryRaw(e.target.value)}
+ onKeyDown={(e) => { if (e.key === 'Enter') addRawParams() }}
+ placeholder="a=b&c=d"
+ className="w-full h-[26px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 text-xs font-mono text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+ />
+ </div>
+ )}
+ </div>
+ <div className="flex items-center justify-end gap-1.5 px-3 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950">
+ <button
+ type="button"
+ onClick={queryInputMode === 'kv' ? addKvParam : addRawParams}
+ className="h-[26px] px-3 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+ >
+ Add
+ </button>
+ </div>
+ </div>
+ )
+ })()}
+ </span>
+ </>)}
+
  {/* Per-section clear X — inside the content div, pinned to the right and always vertically centered */}
  {(() => {
  const sectionClearClick =
@@ -2289,13 +2661,15 @@ export default function ResourcePage() {
  ? () => { setWhereBuilderExpr(null); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setPage(0) }
  : effectiveActiveTab === 'sort' && sortOrder.length > 0
  ? () => { setSortOrder([]); setStagedSortOrder([]); setPage(0) }
- : effectiveActiveTab === 'fieldRetrieval' && fieldRetrievalEntries.length > 0
- ? () => { setFieldRetrievalEntries([]); setPage(0) }
+ : effectiveActiveTab === 'fieldRetrieval' && (fieldRetrievalEntries.length > 0 || selectedFieldset !== null)
+ ? () => { setFieldRetrievalEntries([]); setSelectedFieldset(null); setPage(0) }
  : effectiveActiveTab === 'fieldDisplay' && hiddenFields.size > 0
  ? () => setHiddenFields(new Set())
+ : effectiveActiveTab === 'query' && customQueryParams.length > 0
+ ? () => { setCustomQueryParams([]); setPage(0) }
  : null
  if (!sectionClearClick) return null
- const labels = { sets: 'Clear set filter', where: 'Clear where filter', sort: 'Clear sort order', fieldRetrieval: 'Clear field retrieval', fieldDisplay: 'Clear field display' }
+ const labels = { sets: 'Clear set filter', where: 'Clear where filter', sort: 'Clear sort order', fieldRetrieval: 'Clear field retrieval', fieldDisplay: 'Clear field display', query: 'Clear query params' }
  return (
  <button
  type="button"
@@ -2316,7 +2690,7 @@ export default function ResourcePage() {
  {/* Clear All button — icon only, far right of the gray container */}
  <button
  type="button"
- onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setStagedSortOrder([]); setFieldRetrievalEntries([]); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setHiddenFields(new Set()); setFieldDisplayMode('HIDE'); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setPage(0) }}
+ onClick={() => { setFilterBuilderExpr(null); setWhereBuilderExpr(null); setSortOrder([]); setStagedSortOrder([]); setFieldRetrievalEntries([]); setStagedSetKeys([]); setStagedSetMeta({}); setStagedWhereClauses([makeEmptyWhereClause()]); setWhereInternalOp('and'); setHiddenFields(new Set()); setFieldDisplayMode('HIDE'); setHiddenRecordIds(new Set()); setHiddenRecordMeta({}); setCustomQueryParams([]); setSelectedFieldset(null); setPage(0) }}
  className="flex items-center justify-center w-9 flex-shrink-0 text-gray-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors self-stretch"
  title="Clear all filters and display settings"
  aria-label="Clear all filters and display settings"
@@ -2353,62 +2727,6 @@ export default function ResourcePage() {
  </div>
  )
  })()}
-
- {selectedCount > 0 && (
- <div className="inline-flex items-center border border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden bg-gray-50 dark:bg-slate-800">
- <span className="px-2.5 py-2 text-[11px] text-gray-700 dark:text-slate-300 font-medium">
- {selectedCount} selected
- </span>
- <button
- type="button"
- onClick={() => setPendingBulkAction('activate')}
- disabled={!canActivate || bulkProgress.running}
- className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
- title={canActivate ? 'Activate selected records' : 'Activate is not supported on this resource'}
- >
- Activate
- </button>
- <button
- type="button"
- onClick={() => setPendingBulkAction('deactivate')}
- disabled={!canDeactivate || bulkProgress.running}
- className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
- title={canDeactivate ? 'Deactivate selected records' : 'Deactivate is not supported on this resource'}
- >
- Deactivate
- </button>
- <button
- type="button"
- onClick={() => setPendingBulkAction('hide')}
- disabled={bulkProgress.running}
- className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
- title="Hide selected records in this UI"
- >
- Hide
- </button>
- <button
- type="button"
- onClick={() => setPendingBulkAction('delete')}
- disabled={!canDeleteItem || bulkProgress.running}
- className="px-2.5 py-2 text-xs text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
- title={canDeleteItem ? 'Delete selected records' : 'Delete is not supported on this resource'}
- >
- Delete
- </button>
- <button
- type="button"
- onClick={() => setSelectedRowIds(new Set())}
- disabled={bulkProgress.running}
- className="px-2 py-2 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
- title="Clear selection"
- aria-label="Clear selection"
- >
- <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
- <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
- </svg>
- </button>
- </div>
- )}
 
  {/* Right: action button group — Add New, Refresh, Query info */}
  <div className="ml-auto inline-flex border border-b-0 border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden">
@@ -3270,6 +3588,17 @@ export default function ResourcePage() {
  </div>
  )
  })()}
+
+ {customQueryParams.length > 0 && (
+ <div className="space-y-1.5">
+ <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Custom query</p>
+ <div className="flex flex-wrap gap-1.5">
+ {customQueryParams.map((p) => (
+ <span key={p.id} className="px-2 py-0.5 text-xs bg-emerald-600/20 text-emerald-300 border border-emerald-700 font-mono">{p.key}={p.value}</span>
+ ))}
+ </div>
+ </div>
+ )}
 
  </div>
 

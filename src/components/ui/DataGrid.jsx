@@ -1303,6 +1303,51 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  const [pendingDeleteRow, setPendingDeleteRow] = useState(null)
  const [pendingActivateRow, setPendingActivateRow] = useState(null)
  const [pendingDeactivateRow, setPendingDeactivateRow] = useState(null)
+
+ // Column resize state — keyed by column key, pixel widths
+ const [colWidths, setColWidths] = useState({})
+ const colResizingRef = useRef(null) // { key, startX, startW }
+ const theadRowRef = useRef(null)
+
+ function handleColResizeStart(e, key) {
+   e.preventDefault()
+   e.stopPropagation()
+
+   // Snapshot ALL column widths from the DOM right now so fixed layout
+   // doesn't redistribute space — this prevents other columns from shifting.
+   const thEls = theadRowRef.current ? Array.from(theadRowRef.current.querySelectorAll('th')) : []
+   const snapshot = {}
+   thEls.forEach((th) => {
+     const colKey = th.dataset.colkey
+     if (colKey) snapshot[colKey] = th.getBoundingClientRect().width
+   })
+
+   const startX = e.clientX
+   const startW = snapshot[key] ?? e.currentTarget.closest('th').getBoundingClientRect().width
+   colResizingRef.current = { key, startX, startW }
+
+   // Commit snapshot immediately so the layout is locked before the first move
+   setColWidths(snapshot)
+
+   document.body.style.cursor = 'col-resize'
+   document.body.style.userSelect = 'none'
+
+   function onMove(ev) {
+     const { key: k, startX: sx, startW: sw } = colResizingRef.current
+     const newW = Math.max(60, sw + ev.clientX - sx)
+     setColWidths((prev) => ({ ...prev, [k]: newW }))
+   }
+   function onUp() {
+     document.removeEventListener('mousemove', onMove)
+     document.removeEventListener('mouseup', onUp)
+     document.body.style.cursor = ''
+     document.body.style.userSelect = ''
+     colResizingRef.current = null
+   }
+   document.addEventListener('mousemove', onMove)
+   document.addEventListener('mouseup', onUp)
+ }
+
  const scrollRoRef = useRef(null)
  const scrollContainerRef = useCallback((el) => {
  if (scrollRoRef.current) { scrollRoRef.current.disconnect(); scrollRoRef.current = null }
@@ -1529,9 +1574,14 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  <span className="font-mono text-xs text-gray-700 dark:text-slate-300">{colTooltip.key}</span>
  </div>
  )}
- <table className="w-full text-sm">
+ <table className="text-sm" style={{ tableLayout: Object.keys(colWidths).length ? 'fixed' : 'auto', width: Object.keys(colWidths).length ? 'max-content' : '100%' }}>
+ <colgroup>
+ {orderedColumns.map((col) => (
+ <col key={col.key} style={colWidths[col.key] ? { width: colWidths[col.key] } : undefined} />
+ ))}
+ </colgroup>
  <thead>
- <tr className="bg-gray-100 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700">
+ <tr ref={theadRowRef} className="bg-gray-100 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700">
  {orderedColumns.map((col) => {
  const sortEntry = sortOrder?.find((s) => s.field === col.key)
  const isSorted = !!sortEntry
@@ -1539,9 +1589,11 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  return (
  <th
  key={col.key}
+ data-colkey={col.key}
  onDragEnter={(e) => handleColDragEnter(e, col.key)}
  onDragOver={handleColDragOver}
  onDrop={(e) => handleColDrop(e, col.key)}
+ style={colWidths[col.key] ? { width: colWidths[col.key] } : undefined}
  className={`group relative text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap select-none transition-colors hover:bg-gray-200 dark:hover:bg-slate-700/50 ${isSorted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-slate-400'}${isDropTarget ? ' border-l-2 border-l-blue-500' : ''}`}
  onMouseEnter={(e) => {
  const rect = e.currentTarget.getBoundingClientRect()
@@ -1711,6 +1763,15 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  </button>
  </div>
  )}
+ {/* Column resize handle */}
+ <div
+ className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-stretch"
+ onMouseDown={(e) => handleColResizeStart(e, col.key)}
+ onClick={(e) => e.stopPropagation()}
+ aria-hidden="true"
+ >
+ <div className="w-0.5 mx-auto self-stretch bg-blue-400 dark:bg-blue-500 opacity-60 hover:opacity-100 transition-opacity" />
+ </div>
  </th>
  )
  })}
