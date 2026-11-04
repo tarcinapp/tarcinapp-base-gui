@@ -1776,7 +1776,7 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  )
  : col.key === '_id' && typeof row[col.key] === 'string'
  ? (
- <div className="flex items-center gap-1.5" title={row[col.key]}>
+ <div className="group/idcell flex items-center gap-1.5" title={row[col.key]}>
  {status && (
  <span
  className="flex-shrink-0 w-1.5 h-1.5 rounded-full"
@@ -1787,10 +1787,10 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  <span className="font-mono text-xs text-gray-700 dark:text-slate-300">{shortId(row[col.key])}</span>
  <button
  onClick={(e) => copyId(e, row[col.key])}
- className={`px-1.5 py-0.5 border text-[10px] leading-none ${
+ className={`px-1.5 py-0.5 border text-[10px] leading-none transition-opacity ${
  copiedId === row[col.key]
- ? 'border-emerald-500 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300'
- : 'border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-500'
+ ? 'opacity-100 border-emerald-500 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300'
+ : 'opacity-0 group-hover/idcell:opacity-100 border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-500'
  }`}
  title={copiedId === row[col.key] ? 'Copied' : 'Copy full ID'}
  aria-label="Copy ID"

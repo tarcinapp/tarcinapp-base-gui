@@ -1,12 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
-import { parseOasSpec } from '../../utils/oasParser'
 
 export default function TopBar({ onToggleSidebar }) {
- const location = useLocation()
- const { oasSpec, endpoint, setEndpoint, serverOptions, token } = useApp()
- const { navItems } = oasSpec ? parseOasSpec(oasSpec) : { navItems: [] }
+  const { endpoint, setEndpoint, serverOptions, oasSpec } = useApp()
 
  const [endpointOpen, setEndpointOpen] = useState(false)
  const endpointRef = useRef(null)
@@ -31,43 +27,31 @@ export default function TopBar({ onToggleSidebar }) {
  ? [{ url: endpoint, description: 'Current' }, ...endpointChoices]
  : endpointChoices
 
- // Derive active page title from current route
- function getTitle() {
- if (location.pathname === '/') return 'Dashboard'
- const parts = location.pathname.split('/').filter(Boolean)
- // /r/:tagSlug/:subResource or /r/:tagSlug
- if (parts[0] === 'r') {
- const tagSlug = parts[1]
- const subResource = parts[2]
- const navItem = navItems.find((n) => n.id === tagSlug)
- if (navItem) {
- if (subResource) {
- const child = navItem.children.find(
- (c) => c.subResource === decodeURIComponent(subResource)
- )
- return child ? `${navItem.label} › ${child.label}` : navItem.label
- }
- return navItem.label
- }
- }
- return 'Dashboard'
- }
-
  return (
- <header className="flex items-center justify-between h-14 px-6 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-slate-800 flex-shrink-0">
- {/* Left: hamburger + page title */}
- <div className="flex items-center gap-3">
- <button
- onClick={onToggleSidebar}
- className="p-1.5 text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
- aria-label="Toggle sidebar"
- >
- <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
- </svg>
- </button>
- <h1 className="text-base font-semibold text-gray-900 dark:text-slate-100">{getTitle()}</h1>
- </div>
+   <header className="flex items-center justify-between h-14 px-4 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-slate-800 flex-shrink-0 w-full">
+     {/* Left: hamburger + app name + API name */}
+     <div className="flex items-center gap-3">
+       <button
+         onClick={onToggleSidebar}
+         className="p-1.5 text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+         aria-label="Toggle sidebar"
+       >
+         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+         </svg>
+       </button>
+       <div className="flex items-baseline gap-2">
+         <span className="text-sm font-semibold text-gray-900 dark:text-white leading-none">Tarcinapp</span>
+         {oasSpec?.info?.title && (
+           <>
+             <span className="text-gray-300 dark:text-slate-600 text-sm leading-none select-none">/</span>
+             <span className="text-xs text-gray-500 dark:text-slate-400 leading-none truncate max-w-[240px]">
+               {oasSpec.info.title}
+             </span>
+           </>
+         )}
+       </div>
+     </div>
 
  {/* Right: endpoint selector + theme toggle */}
  <div className="flex items-center gap-2">

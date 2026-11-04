@@ -60,29 +60,12 @@ export default function Sidebar({ collapsed = false, onToggle }) {
  const navGroups = groupByBaseType(navItems)
 
  return (
- <aside
- className={`flex flex-col min-h-screen bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 transition-all duration-200 flex-shrink-0 ${
- collapsed ? 'w-14' : 'w-56'
- }`}
- >
- {/* Brand */}
- <div className={`flex items-center border-b border-gray-200 dark:border-slate-800 ${collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-5 py-3'}`}>
- <div className="w-8 h-8 bg-blue-600 flex items-center justify-center flex-shrink-0">
- <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
- </svg>
- </div>
- {!collapsed && (
- <div className="overflow-hidden">
- <p className="text-gray-900 dark:text-white font-semibold text-sm leading-none">Tarcinapp</p>
- <p className="text-gray-500 dark:text-slate-400 text-xs mt-0.5 truncate">
- {oasSpec?.info?.title ?? 'Entity Platform'}
- </p>
- </div>
- )}
- </div>
-
- {/* Navigation */}
+   <aside
+     className={`flex flex-col bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 transition-all duration-200 flex-shrink-0 ${
+       collapsed ? 'w-14' : 'w-56'
+     }`}
+   >
+     {/* Navigation */}
  <nav className={`flex-1 py-2 space-y-0 overflow-y-auto ${collapsed ? 'px-1.5' : 'px-2'}`}>
  {/* Dashboard */}
  <NavLink
