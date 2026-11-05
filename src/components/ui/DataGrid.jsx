@@ -1306,8 +1306,15 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
 
  // Column resize state — keyed by column key, pixel widths
  const [colWidths, setColWidths] = useState({})
+ const colWidthsRef = useRef({}) // always-current mirror so effects avoid stale closures
+ colWidthsRef.current = colWidths
+ // Set of column keys the user has *explicitly* finished dragging to resize.
+ // Distinguished from auto-snapshotted widths so hide/show can redistribute
+ // only the unlocked (non-manually-set) columns.
+ const [manualColWidths, setManualColWidths] = useState(() => new Set())
  const colResizingRef = useRef(null) // { key, startX, startW }
  const theadRowRef = useRef(null)
+ const scrollElRef = useRef(null) // holds the scroll container DOM node
 
  function handleColResizeStart(e, key) {
    e.preventDefault()
@@ -1342,14 +1349,61 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
      document.removeEventListener('mouseup', onUp)
      document.body.style.cursor = ''
      document.body.style.userSelect = ''
+     // Mark this column as manually resized so hide/show keeps its width
+     setManualColWidths((prev) => { const next = new Set(prev); next.add(key); return next })
      colResizingRef.current = null
    }
    document.addEventListener('mousemove', onMove)
    document.addEventListener('mouseup', onUp)
  }
 
+ // When the visible column set changes while in fixed-layout mode, redistribute
+ // widths so the remaining columns always fill the full container width.
+ useEffect(() => {
+   const cw = colWidthsRef.current
+   if (Object.keys(cw).length === 0) return // still in auto mode — nothing to do
+
+   const containerWidth = scrollElRef.current?.clientWidth
+   if (!containerWidth) return
+
+   const visibleKeys = orderedColumns.map((c) => c.key)
+
+   // Drop widths for columns that are no longer visible
+   const pruned = {}
+   visibleKeys.forEach((k) => { if (cw[k] !== undefined) pruned[k] = cw[k] })
+
+   // Split visible columns into locked (user explicitly dragged) and unlocked
+   const locked = visibleKeys.filter((k) => manualColWidths.has(k))
+   const unlocked = visibleKeys.filter((k) => !manualColWidths.has(k))
+
+   const lockedSum = locked.reduce((s, k) => s + (pruned[k] ?? 0), 0)
+   const remaining = containerWidth - lockedSum
+
+   const next = { ...pruned }
+
+   if (unlocked.length > 0 && remaining > 0) {
+     // Distribute remaining space equally among unlocked columns
+     const share = remaining / unlocked.length
+     unlocked.forEach((k) => { next[k] = Math.max(60, share) })
+   } else if (unlocked.length === 0) {
+     // Every visible column is manually locked — stretch proportionally
+     const totalLocked = locked.reduce((s, k) => s + (pruned[k] ?? 60), 0)
+     if (totalLocked > 0) {
+       locked.forEach((k) => { next[k] = Math.max(60, ((pruned[k] ?? 60) / totalLocked) * containerWidth) })
+     }
+   }
+
+   // Only commit if something actually changed
+   const changed =
+     Object.keys(next).length !== Object.keys(cw).length ||
+     Object.keys(next).some((k) => next[k] !== cw[k])
+   if (changed) setColWidths(next)
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [orderedColumns.map((c) => c.key).join(','), manualColWidths])
+
  const scrollRoRef = useRef(null)
  const scrollContainerRef = useCallback((el) => {
+ scrollElRef.current = el
  if (scrollRoRef.current) { scrollRoRef.current.disconnect(); scrollRoRef.current = null }
  if (!el) return
  el.style.setProperty('--cw', el.clientWidth + 'px')
@@ -1763,14 +1817,15 @@ export default function DataGrid({ columns, data, loading, error, onRefresh, onR
  </button>
  </div>
  )}
- {/* Column resize handle */}
+ {/* Column resize handle — centred on the column boundary (3 px inside, 3 px outside) */}
  <div
- className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-stretch"
+ className="absolute top-0 bottom-0 w-3 cursor-col-resize opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-stretch"
+ style={{ right: '-6px' }}
  onMouseDown={(e) => handleColResizeStart(e, col.key)}
  onClick={(e) => e.stopPropagation()}
  aria-hidden="true"
  >
- <div className="w-0.5 mx-auto self-stretch bg-blue-400 dark:bg-blue-500 opacity-60 hover:opacity-100 transition-opacity" />
+ <div className="w-px mx-auto self-stretch bg-blue-400 dark:bg-blue-500" />
  </div>
  </th>
  )

@@ -1701,7 +1701,7 @@ export default function ResourcePage() {
 
  {/* ── Toolbar + filter panel: grouped so no space-y-4 gap between them ── */}
  <div className="relative flex flex-col z-20">
- <div className="flex items-center gap-3">
+ <div className="flex items-end gap-3">
  {/* Left: selection action bar — shown only when rows are selected, replaces the filter group */}
  {selectedCount > 0 && (
  <div className="inline-flex items-stretch border border-b-0 border-gray-200 dark:border-slate-700 divide-x divide-gray-200 dark:divide-slate-700 overflow-hidden h-9">
@@ -1772,13 +1772,13 @@ export default function ResourcePage() {
  customQueryParams.length > 0,
  ].filter(Boolean).length
  const tabs = [
-  ...(navItem.hasSet && navItem.setSchemaProps ? [{ id: 'sets', label: 'Sets' }] : []),
   ...(navItem.hasFilterWhere ? [{ id: 'where', label: 'Where' }] : []),
+  { id: 'query', label: 'Query' },
+  ...(navItem.hasSet && navItem.setSchemaProps ? [{ id: 'sets', label: 'Sets' }] : []),
   ...(navItem.hasFilterOrder ? [{ id: 'sort', label: 'Sort' }] : []),
   ...(showFieldSelector ? [{ id: 'fieldRetrieval', label: 'Field Retrieval' }] : []),
   ...(showFieldSelector ? [{ id: 'fieldDisplay', label: 'Field Display' }] : []),
   { id: 'itemDisplay', label: 'Item Display' },
-  { id: 'query', label: 'Query' },
   ]
  // Ensure there is always an active tab when the panel opens
  const effectiveActiveTab = activeFilterTab ?? (tabs.length > 0 ? tabs[0].id : null)
