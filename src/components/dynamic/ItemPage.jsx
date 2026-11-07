@@ -760,7 +760,7 @@ export default function ItemPage() {
  <button
  onClick={() => setPendingActivate(true)}
  disabled={activating}
- className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-emerald-800/40 hover:bg-emerald-700/50 text-emerald-300 hover:text-emerald-100 disabled:opacity-50 transition-colors"
+ className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-800/40 dark:hover:bg-emerald-700/50 text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100 disabled:opacity-50 transition-colors"
  title={isReactivate ? 'Clear valid-until date' : 'Set valid from now'}
  >
  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
@@ -774,7 +774,7 @@ export default function ItemPage() {
  <button
  onClick={() => setPendingDeactivate(true)}
  disabled={deactivating}
- className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-amber-900/30 hover:bg-amber-800/50 text-amber-400 hover:text-amber-200 disabled:opacity-50 transition-colors"
+ className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 text-amber-700 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200 disabled:opacity-50 transition-colors"
  title="Set valid until now"
  >
  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
