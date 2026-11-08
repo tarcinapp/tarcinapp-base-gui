@@ -26,8 +26,10 @@ export async function apiFetch(baseUrl, path, token, options = {}) {
 
   let res
   try {
-    res = await fetch(url, { cache: 'no-store', ...options, headers })
+    res = await fetch(url, { cache: 'no-store', ...options, headers, signal: options.signal ?? null })
   } catch (err) {
+    // Let abort errors propagate as-is so callers can check signal.aborted.
+    if (err?.name === 'AbortError') throw err
     const netErr = new Error(
       `Network/CORS error while calling ${path}. Check API server reachability and CORS headers. (${err?.message ?? 'fetch failed'})`
     )
@@ -76,8 +78,9 @@ export async function apiFetchWithMeta(baseUrl, path, token, options = {}) {
 
   let res
   try {
-    res = await fetch(url, { cache: 'no-store', ...options, headers })
+    res = await fetch(url, { cache: 'no-store', ...options, headers, signal: options.signal ?? null })
   } catch (err) {
+    if (err?.name === 'AbortError') throw err
     const netErr = new Error(
       `Network/CORS error while calling ${path}. Check API server reachability and CORS headers. (${err?.message ?? 'fetch failed'})`
     )
@@ -140,13 +143,13 @@ export function useApiClient() {
     : { 'Cache-Control': 'public' }
 
   const get = useCallback(
-    (path) => apiFetch(endpoint, path, token, { headers: cacheHeaders }),
+    (path, signal) => apiFetch(endpoint, path, token, { headers: cacheHeaders, signal }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [endpoint, token, bypassCache]
   )
 
   const getWithMeta = useCallback(
-    (path) => apiFetchWithMeta(endpoint, path, token, { headers: cacheHeaders }),
+    (path, signal) => apiFetchWithMeta(endpoint, path, token, { headers: cacheHeaders, signal }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [endpoint, token, bypassCache]
   )

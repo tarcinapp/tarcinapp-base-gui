@@ -1048,26 +1048,26 @@ export default function ResourcePage() {
  return () => window.clearTimeout(listRelateSearchDebounceRef.current)
  }, [listRelateState, listRelateSearch, listRelatePage, listNavItemsForPicker, entityNavItemsForPicker, oasSpec, get])
 
- const fetcher = useCallback(async () => {
- if (!navItem?.collectionPath) return []
+ const fetcher = useCallback(async (signal) => {
+  if (!navItem?.collectionPath) return []
 
- const qs = new URLSearchParams()
- qs.set(paginationKeys.limitKey, String(pageSize))
- qs.set(paginationKeys.skipKey, String(page * pageSize))
- buildFilterExprQuery(qs, filterBuilderExpr)
- buildWhereFilterQuery(qs, whereBuilderExpr)
- if (debouncedSearch) {
- if (navItem?.hasSimplifiedSearch) qs.set('s', debouncedSearch)
- else qs.set('filter[where][_name][regexp]', `.*${debouncedSearch}.*`)
- }
- if (selectedQ) qs.set('q', selectedQ)
- if (selectedFieldset) qs.set('fieldset', selectedFieldset)
- buildFilterFieldsParams(qs, fieldRetrievalEntries)
- buildFilterOrderParams(qs, sortOrder)
- for (const p of customQueryParams) { if (p.key.trim()) qs.append(p.key.trim(), p.value) }
+  const qs = new URLSearchParams()
+  qs.set(paginationKeys.limitKey, String(pageSize))
+  qs.set(paginationKeys.skipKey, String(page * pageSize))
+  buildFilterExprQuery(qs, filterBuilderExpr)
+  buildWhereFilterQuery(qs, whereBuilderExpr)
+  if (debouncedSearch) {
+  if (navItem?.hasSimplifiedSearch) qs.set('s', debouncedSearch)
+  else qs.set('filter[where][_name][regexp]', `.*${debouncedSearch}.*`)
+  }
+  if (selectedQ) qs.set('q', selectedQ)
+  if (selectedFieldset) qs.set('fieldset', selectedFieldset)
+  buildFilterFieldsParams(qs, fieldRetrievalEntries)
+  buildFilterOrderParams(qs, sortOrder)
+  for (const p of customQueryParams) { if (p.key.trim()) qs.append(p.key.trim(), p.value) }
 
- const start = performance.now()
- const { data, headers, status, requestHeaders: reqHeaders } = await getWithMeta(`${navItem.collectionPath}?${qs.toString()}`)
+  const start = performance.now()
+  const { data, headers, status, requestHeaders: reqHeaders } = await getWithMeta(`${navItem.collectionPath}?${qs.toString()}`, signal)
  setQueryDuration(Math.round(performance.now() - start))
  setResponseHeaders(headers)
  setResponseStatus(status)

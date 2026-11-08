@@ -536,9 +536,9 @@ export default function ItemPage() {
  return buildItemPath(navItem.itemPathTemplate, itemId)
  }, [navItem?.itemPathTemplate, itemId])
 
- const fetcher = useCallback(() => {
+ const fetcher = useCallback((signal) => {
  if (!itemPath) return Promise.resolve([])
- return api.get(itemPath).then((obj) => [obj])
+ return api.get(itemPath, signal).then((obj) => [obj])
  }, [api, itemPath])
 
  const { data, loading, error, refresh } = useResourceList(fetcher)

@@ -37,38 +37,38 @@ function validateOasSpec(spec) {
 }
 
 export function AppProvider({ children }) {
- // Environment variables take priority over stored config (Vite exposes VITE_* vars)
- const envEndpoint = import.meta.env.TAPP_API_ENDPOINT ?? null
- const envToken = import.meta.env.TAPP_API_TOKEN ?? null
+  // Environment variables take priority over stored config (Vite exposes VITE_* vars)
+  const envEndpoint = import.meta.env.TAPP_API_ENDPOINT ?? null
+  const envToken = import.meta.env.TAPP_API_TOKEN ?? null
 
- const stored = loadConfig()
+  const stored = loadConfig()
 
- const [endpoint, setEndpointRaw] = useState(envEndpoint ?? stored.endpoint ?? null)
- const [token, setTokenRaw] = useState(envToken ?? stored.token ?? null)
- const [bypassCache, setBypassCacheRaw] = useState(stored.bypassCache ?? true)
- const [oasSpec, setOasSpec] = useState(null)
- // 'idle' | 'loading' | 'success' | 'error'
- const [oasStatus, setOasStatus] = useState('idle')
- const [oasError, setOasError] = useState(null)
+  const [endpoint, setEndpointRaw] = useState(envEndpoint ?? stored.endpoint ?? null)
+  const [token, setTokenRaw] = useState(envToken ?? stored.token ?? null)
+  const [bypassCache, setBypassCacheRaw] = useState(stored.bypassCache ?? true)
+  const [oasSpec, setOasSpec] = useState(null)
+  // 'idle' | 'loading' | 'success' | 'error'
+  const [oasStatus, setOasStatus] = useState('idle')
+  const [oasError, setOasError] = useState(null)
 
- const setEndpoint = useCallback(
- (url) => {
- const trimmed = url?.trim() || null
- setEndpointRaw(trimmed)
- // Don't persist env-provided values (they're already in the environment)
- if (!envEndpoint) saveConfig({ ...loadConfig(), endpoint: trimmed })
- },
- [envEndpoint]
- )
+  const setEndpoint = useCallback(
+  (url) => {
+  const trimmed = url?.trim() || null
+  setEndpointRaw(trimmed)
+  // Don't persist env-provided values (they're already in the environment)
+  if (!envEndpoint) saveConfig({ ...loadConfig(), endpoint: trimmed })
+  },
+  [envEndpoint]
+  )
 
- const setToken = useCallback(
- (t) => {
- const trimmed = t?.trim() || null
- setTokenRaw(trimmed)
- if (!envToken) saveConfig({ ...loadConfig(), token: trimmed })
- },
- [envToken]
- )
+  const setToken = useCallback(
+  (t) => {
+  const trimmed = t?.trim() || null
+  setTokenRaw(trimmed)
+  if (!envToken) saveConfig({ ...loadConfig(), token: trimmed })
+  },
+  [envToken]
+  )
 
  const setBypassCache = useCallback((val) => {
  setBypassCacheRaw(val)
